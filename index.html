@@ -332,7 +332,7 @@
         <a href="cv.pdf">cv</a>
         <a href="https://github.com/subev">github</a>
         <a href="https://www.linkedin.com/in/subev/">linkedin</a>
-        <a href="mailto:petur.subev@gmail.com">email</a>
+        <a href="#" class="mailme">email</a>
         <a
           href="#"
           id="themeToggle"
@@ -453,8 +453,9 @@
       </p>
 
       <footer>
-        <span class="prompt">~ $</span> mail petur.subev@gmail.com · sofia,
-        bulgaria · <a href="cv.pdf">cv.pdf</a>
+        <span class="prompt">~ $</span> mail
+        <a href="#" class="mailme">[click to reveal]</a> · sofia, bulgaria ·
+        <a href="cv.pdf">cv.pdf</a>
       </footer>
     </div>
 
@@ -463,6 +464,16 @@
         var reduced = window.matchMedia(
           "(prefers-reduced-motion: reduce)",
         ).matches;
+
+        /* ---- email (assembled at runtime, absent from static HTML) ---- */
+        var addr = ["petur", ".", "subev"].join("") + "@" + "gmail" + ".com";
+        document.querySelectorAll(".mailme").forEach(function (el) {
+          el.addEventListener("click", function (e) {
+            e.preventDefault();
+            el.textContent = addr;
+            window.location.href = "mailto:" + addr;
+          });
+        });
 
         /* ---- theme toggle ---- */
         var toggle = document.getElementById("themeToggle");
