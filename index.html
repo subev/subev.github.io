@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>petur subev — product engineer</title>
+    <meta
+      name="description"
+      content="Staff-level product engineer, 15 years in startups. Frontend-deep, full-stack current. Sofia, Bulgaria."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect x=%2210%22 y=%2210%22 width=%2235%22 height=%2235%22 fill=%22%230f6b66%22/><rect x=%2255%22 y=%2210%22 width=%2235%22 height=%2235%22 fill=%22%234cc29a%22/><rect x=%2210%22 y=%2255%22 width=%2235%22 height=%2235%22 fill=%22%238fdcbd%22/><rect x=%2255%22 y=%2255%22 width=%2235%22 height=%2235%22 fill=%22%2312836f%22/></svg>"
+    />
+    <style>
+      :root {
+        --ground: #f4f6f5;
+        --ink: #1a2420;
+        --muted: #58685f;
+        --faint: #8a9a90;
+        --line: #dde4e0;
+        --card: #ffffff;
+        --t1: #0b4f46;
+        --t2: #0f6b66;
+        --t3: #12836f;
+        --t4: #23a07f;
+        --t5: #4cc29a;
+        --t6: #8fdcbd;
+        --rain-opacity: 0.1;
+        --term-shadow: 0 12px 40px rgba(15, 107, 102, 0.08);
+        --glow: none;
+      }
+      html[data-theme="dark"] {
+        --ground: #0c1210;
+        --ink: #d7e6de;
+        --muted: #93a89d;
+        --faint: #5e7268;
+        --line: #22322b;
+        --card: #101915;
+        --t1: #1a7a68;
+        --t2: #4cc29a;
+        --t3: #35b389;
+        --t4: #3fdc9c;
+        --t5: #6fe9b6;
+        --t6: #a5f4d1;
+        --rain-opacity: 0.16;
+        --term-shadow: 0 12px 48px rgba(63, 220, 156, 0.07);
+        --glow: 0 0 8px rgba(63, 220, 156, 0.45);
+      }
+      html[data-theme="dark"] body {
+        color-scheme: dark;
+      }
+      html[data-theme="dark"] .term-body .prompt,
+      html[data-theme="dark"] h2 .prompt,
+      html[data-theme="dark"] footer .prompt {
+        text-shadow: var(--glow);
+      }
+      html[data-theme="dark"] .cursor {
+        box-shadow: var(--glow);
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--ground);
+        color: var(--ink);
+        font-family:
+          ui-monospace, "SF Mono", Menlo, "Cascadia Code", Consolas, monospace;
+        line-height: 1.65;
+        font-size: 15px;
+      }
+      a {
+        color: var(--t2);
+      }
+      #rain {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        opacity: var(--rain-opacity);
+      }
+
+      nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        gap: 8px;
+      }
+      nav .left,
+      nav .right {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      nav a,
+      nav span.brand {
+        display: inline-block;
+        background: var(--card);
+        border: 1px solid var(--line);
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 13px;
+        padding: 8px 16px;
+        letter-spacing: 0.04em;
+      }
+      @media (max-width: 620px) {
+        nav {
+          flex-direction: column;
+          align-items: stretch;
+          padding: 16px;
+        }
+        nav .left .brand {
+          display: block;
+          text-align: center;
+        }
+        nav .right {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 8px;
+        }
+        nav .right a {
+          text-align: center;
+          padding: 8px 4px;
+        }
+      }
+      nav a:hover {
+        color: var(--t2);
+        border-color: var(--t4);
+      }
+
+      .wrap {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 0 20px 96px;
+      }
+
+      /* terminal hero */
+      .term {
+        margin-top: 56px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        box-shadow: var(--term-shadow);
+      }
+      .term-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--line);
+      }
+      .term-bar i {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        display: block;
+      }
+      .term-bar i:nth-child(1) {
+        background: #f26d5f;
+      }
+      .term-bar i:nth-child(2) {
+        background: #f5bd4f;
+      }
+      .term-bar i:nth-child(3) {
+        background: #59c760;
+      }
+      .term-bar .title {
+        margin-left: 8px;
+        font-size: 12px;
+        color: var(--faint);
+      }
+      .term-body {
+        padding: 20px 22px 24px;
+        font-size: 14px;
+        min-height: 300px;
+      }
+      .term-body .ln {
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .term-body .prompt {
+        color: var(--t4);
+        font-weight: 600;
+      }
+      .term-body .cmd {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .term-body .out {
+        color: var(--muted);
+      }
+      .term-body .out b,
+      .term-body .out a {
+        color: var(--ink);
+      }
+      .term-body .out a {
+        text-decoration-color: var(--t5);
+      }
+      .cursor {
+        display: inline-block;
+        width: 8px;
+        height: 16px;
+        vertical-align: -2px;
+        background: var(--t4);
+        animation: blink 1.1s steps(1) infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .cursor {
+          animation: none;
+        }
+      }
+
+      h2 {
+        font-size: 13px;
+        font-weight: 400;
+        letter-spacing: 0.06em;
+        color: var(--faint);
+        margin: 64px 0 6px;
+      }
+      h2 .prompt {
+        color: var(--t4);
+        font-weight: 600;
+      }
+      h2 .cmd {
+        color: var(--ink);
+      }
+      .rule {
+        border: 0;
+        border-top: 1px solid var(--line);
+        margin-bottom: 20px;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        padding: 22px 24px;
+        margin-bottom: 12px;
+        position: relative;
+      }
+      .card:hover {
+        border-color: var(--t5);
+      }
+      .card::before {
+        content: "❯";
+        position: absolute;
+        left: 24px;
+        top: 21px;
+        color: var(--t4);
+        font-weight: 700;
+      }
+      .card h3 {
+        font-size: 16px;
+        font-weight: 600;
+        padding-left: 22px;
+      }
+      .card h3 a {
+        color: var(--ink);
+        text-decoration: none;
+      }
+      .card h3 a:hover {
+        color: var(--t2);
+      }
+      .card .meta {
+        font-size: 12.5px;
+        color: var(--faint);
+        margin: 1px 0 12px;
+        padding-left: 22px;
+      }
+      .card p {
+        font-size: 14px;
+        color: var(--muted);
+        max-width: 64ch;
+      }
+      .card p b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .stack {
+        margin-top: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .stack span {
+        font-size: 11px;
+        padding: 3px 9px;
+        color: var(--t2);
+        background: var(--ground);
+        border: 1px solid var(--line);
+      }
+
+      .community {
+        color: var(--muted);
+        font-size: 14px;
+        max-width: 64ch;
+      }
+
+      footer {
+        margin-top: 72px;
+        font-size: 13px;
+        color: var(--faint);
+      }
+      footer .prompt {
+        color: var(--t4);
+        font-weight: 600;
+      }
+    </style>
+    <script>
+      (function () {
+        var saved = localStorage.getItem("theme");
+        document.documentElement.dataset.theme =
+          saved === "light" ? "light" : "dark";
+      })();
+    </script>
+  </head>
+  <body>
+    <canvas id="rain" aria-hidden="true"></canvas>
+
+    <nav>
+      <div class="left"><span class="brand">~/subev</span></div>
+      <div class="right">
+        <a href="cv.pdf">cv</a>
+        <a href="https://github.com/subev">github</a>
+        <a href="https://www.linkedin.com/in/subev/">linkedin</a>
+        <a href="mailto:petur.subev@gmail.com">email</a>
+        <a
+          href="#"
+          id="themeToggle"
+          role="button"
+          aria-label="Toggle color theme"
+          >☾</a
+        >
+      </div>
+    </nav>
+
+    <div class="wrap">
+      <section class="term" aria-label="About Petur Subev">
+        <div class="term-bar">
+          <i></i><i></i><i></i><span class="title">petur@sofia — zsh</span>
+        </div>
+        <div class="term-body" id="termBody"></div>
+      </section>
+
+      <h2><span class="prompt">~ $</span> <span class="cmd">ls work/</span></h2>
+      <hr class="rule" />
+
+      <div class="card">
+        <h3><a href="https://jest.com">jest.com</a></h3>
+        <div class="meta">senior full-stack engineer · 2025 – present</div>
+        <p>
+          A consumer platform for mobile web games. I turn designs into the
+          living product — everything you see and tap there, plus the backend
+          behind it: the
+          <b>real-time chat system</b> (WebSockets, cursor pagination,
+          presence), <b>unified Stripe checkout</b> on a credit-balance model,
+          <b>passkey auth</b>, and the PWA layer that makes a web app feel
+          native. 213 production PRs in the first 8 months, working agent-first
+          with Claude Code, kept honest with end-to-end types and tests.
+        </p>
+        <div class="stack">
+          <span>react 19</span><span>ssr</span><span>fastify</span
+          ><span>trpc</span><span>postgresql</span><span>posthog</span
+          ><span>stripe</span><span>pwa</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><a href="https://powertime.org">powertime.org</a></h3>
+        <div class="meta">founding product engineer · 2025</div>
+        <p>
+          Real-time collaboration and group-governance platform — web app plus
+          an Electron desktop app for three OSes, built as the
+          <b>sole frontend engineer</b>. Typed WebSocket layer generated from
+          OpenAPI schemas; CI boots the real Clojure/Datomic backend on every PR
+          to typecheck the frontend against the live API contract.
+        </p>
+        <div class="stack">
+          <span>vue 3</span><span>typescript</span><span>pinia</span
+          ><span>electron</span><span>websockets</span><span>openapi</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>
+          <a href="https://www.v7labs.com/">v7 go</a> &amp;
+          <a href="https://www.v7darwin.com/">v7 darwin</a>
+        </h3>
+        <div class="meta">staff frontend engineer, v7 · 2022 – 2024</div>
+        <p>
+          On V7 Go, built the product's central surface: a
+          <b>project table that stays responsive at 100,000 rows</b> — existing
+          virtual-scroller libraries couldn't handle it, so I forked one and
+          customized it. Also the Entity View, a markdown editor with mention
+          autocomplete, and the signup/growth tooling. On Darwin, built the
+          consensus-review UI for multi-annotator quality control and carried a
+          large share of the Vue 2 → Vue 3 migration.
+        </p>
+        <div class="stack">
+          <span>vue 3</span><span>typescript</span><span>virtualization</span
+          ><span>tailwind</span><span>playwright</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>earlier: leanplum · hyperscience · kendo ui</h3>
+        <div class="meta">2011 – 2021</div>
+        <p>
+          Six years owning Leanplum's web dashboard (enterprise customers like
+          Tinder, Tesco, Lyft) through two full framework migrations.
+          Human-in-the-loop ML annotation tooling at Hyperscience. And where it
+          started: building
+          <a href="https://www.telerik.com/kendo-ui">Kendo UI</a> components
+          used by thousands of .NET developers — the origin of a 20k-reputation
+          Stack Overflow profile.
+        </p>
+        <div class="stack">
+          <span>react</span><span>angular</span><span>jquery→vue</span
+          ><span>asp.net mvc</span><span>spring boot</span>
+        </div>
+      </div>
+
+      <h2>
+        <span class="prompt">~ $</span> <span class="cmd">ls community/</span>
+      </h2>
+      <hr class="rule" />
+      <p class="community">
+        <a href="https://stackoverflow.com/users/332124"
+          >20k+ stack overflow reputation</a
+        >
+        (top answerer for kendo ui) ·
+        <a href="https://www.toptal.com/resume/petur-subev"
+          >toptal verified expert</a
+        >
+        ·
+        <a href="https://www.codementor.io/@subev"
+          >5.0★ codementor mentor since 2014</a
+        >
+        ·
+        <a href="https://github.com/subev/sibling-jump.nvim"
+          >sibling-jump.nvim</a
+        >
+        (tree-sitter navigation for neovim)
+      </p>
+
+      <footer>
+        <span class="prompt">~ $</span> mail petur.subev@gmail.com · sofia,
+        bulgaria · <a href="cv.pdf">cv.pdf</a>
+      </footer>
+    </div>
+
+    <script>
+      (function () {
+        var reduced = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+
+        /* ---- theme toggle ---- */
+        var toggle = document.getElementById("themeToggle");
+        function syncToggle() {
+          var dark = document.documentElement.dataset.theme === "dark";
+          toggle.textContent = dark ? "* theme" : "c theme";
+        }
+        toggle.addEventListener("click", function (e) {
+          e.preventDefault();
+          var next =
+            document.documentElement.dataset.theme === "dark"
+              ? "light"
+              : "dark";
+          document.documentElement.dataset.theme = next;
+          localStorage.setItem("theme", next);
+          syncToggle();
+        });
+        syncToggle();
+
+        /* ---- terminal session ---- */
+        var SESSION = [
+          {
+            cmd: "whoami",
+            out: "petur subev — product engineer, frontend-deep, full-stack current",
+          },
+          {
+            cmd: "cat about.txt",
+            out: "15 years in startups: react, vue, typescript on the front;\nnode, fastify, trpc, postgresql behind. i own features from\nthe db schema to the last css detail — and measure whether\nthey worked.",
+          },
+          {
+            cmd: "cat now.txt",
+            out: 'turning designs into a living product at <a href="https://jest.com">jest.com</a>\nworking agent-first with claude code, kept honest with\nend-to-end types and tests',
+          },
+          {
+            cmd: "pwd",
+            out: "/earth/bulgaria/sofia  (remote-friendly, utc+2)",
+          },
+        ];
+
+        var body = document.getElementById("termBody");
+
+        function promptLine() {
+          var ln = document.createElement("div");
+          ln.className = "ln";
+          ln.innerHTML =
+            '<span class="prompt">~ $ </span><span class="cmd"></span>';
+          body.appendChild(ln);
+          return ln.querySelector(".cmd");
+        }
+        function outBlock(html) {
+          var ln = document.createElement("div");
+          ln.className = "ln out";
+          ln.innerHTML = html.replace(/\n/g, "<br>");
+          body.appendChild(ln);
+        }
+        var cursor = document.createElement("span");
+        cursor.className = "cursor";
+
+        if (reduced) {
+          SESSION.forEach(function (step) {
+            promptLine().textContent = step.cmd;
+            outBlock(step.out);
+          });
+          var end = document.createElement("div");
+          end.className = "ln";
+          end.innerHTML = '<span class="prompt">~ $ </span>';
+          end.appendChild(cursor);
+          body.appendChild(end);
+        } else {
+          var si = 0;
+          function nextStep() {
+            if (si >= SESSION.length) {
+              var end = document.createElement("div");
+              end.className = "ln";
+              end.innerHTML = '<span class="prompt">~ $ </span>';
+              end.appendChild(cursor);
+              body.appendChild(end);
+              return;
+            }
+            var step = SESSION[si++];
+            var cmdEl = promptLine();
+            cmdEl.appendChild(cursor);
+            var ci = 0;
+            (function typeChar() {
+              if (ci < step.cmd.length) {
+                cursor.before(document.createTextNode(step.cmd[ci++]));
+                setTimeout(typeChar, 34 + Math.random() * 46);
+              } else {
+                setTimeout(function () {
+                  cursor.remove();
+                  outBlock(step.out);
+                  setTimeout(nextStep, 420);
+                }, 260);
+              }
+            })();
+          }
+          setTimeout(nextStep, 500);
+        }
+
+        /* ---- pixel rain ---- */
+        var canvas = document.getElementById("rain");
+        var ctx = canvas.getContext("2d");
+        var SHADES = [
+          "#0b4f46",
+          "#0f6b66",
+          "#12836f",
+          "#23a07f",
+          "#4cc29a",
+          "#8fdcbd",
+        ];
+        var CELL = 8,
+          GAP = 4,
+          STEP = CELL + GAP;
+        var drops = [];
+
+        function resize() {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+          var cols = Math.ceil(canvas.width / STEP);
+          drops = [];
+          for (var i = 0; i < cols; i++) {
+            if (Math.random() < 0.28) drops.push(newDrop(i, true));
+          }
+        }
+        function newDrop(col, anywhere) {
+          return {
+            col: col,
+            y: anywhere ? Math.random() * canvas.height : -Math.random() * 200,
+            speed: 0.25 + Math.random() * 0.6,
+            len: 3 + Math.floor(Math.random() * 5),
+            shade: SHADES[Math.floor(Math.random() * SHADES.length)],
+          };
+        }
+        function frame() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          for (var i = 0; i < drops.length; i++) {
+            var d = drops[i];
+            for (var t = 0; t < d.len; t++) {
+              var cy = d.y - t * STEP;
+              if (cy < -CELL || cy > canvas.height) continue;
+              ctx.globalAlpha = 1 - t / d.len;
+              ctx.fillStyle = d.shade;
+              ctx.fillRect(
+                d.col * STEP,
+                Math.floor(cy / STEP) * STEP,
+                CELL,
+                CELL,
+              );
+            }
+            d.y += d.speed;
+            if (d.y - d.len * STEP > canvas.height)
+              drops[i] = newDrop(
+                Math.floor(Math.random() * (canvas.width / STEP)),
+                false,
+              );
+          }
+          ctx.globalAlpha = 1;
+          requestAnimationFrame(frame);
+        }
+        window.addEventListener("resize", resize);
+        resize();
+        if (reduced) {
+          for (var i = 0; i < drops.length; i++) {
+            var d = drops[i];
+            ctx.fillStyle = d.shade;
+            ctx.fillRect(
+              d.col * STEP,
+              Math.floor(d.y / STEP) * STEP,
+              CELL,
+              CELL,
+            );
+          }
+        } else {
+          requestAnimationFrame(frame);
+        }
+      })();
+    </script>
+  </body>
+</html>
