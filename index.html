@@ -71,8 +71,21 @@
         line-height: 1.65;
         font-size: 15px;
       }
+      @media (prefers-reduced-motion: no-preference) {
+        html {
+          scroll-behavior: smooth;
+        }
+      }
       a {
         color: var(--t2);
+      }
+      a.ext::after {
+        content: "\2197";
+        display: inline-block;
+        margin-left: 3px;
+        font-size: 0.78em;
+        color: var(--t4);
+        text-decoration: none;
       }
       #rain {
         position: fixed;
@@ -132,6 +145,10 @@
       nav a:hover {
         color: var(--t2);
         border-color: var(--t4);
+      }
+      nav a svg.chev {
+        vertical-align: -2px;
+        margin-right: 4px;
       }
 
       .wrap {
@@ -226,6 +243,7 @@
         letter-spacing: 0.06em;
         color: var(--faint);
         margin: 64px 0 6px;
+        scroll-margin-top: 20px;
       }
       h2 .prompt {
         color: var(--t4);
@@ -243,20 +261,43 @@
       .card {
         background: var(--card);
         border: 1px solid var(--line);
-        padding: 22px 24px;
         margin-bottom: 12px;
-        position: relative;
       }
       .card:hover {
         border-color: var(--t5);
       }
-      .card::before {
-        content: "❯";
+      .card > summary {
+        display: block;
+        position: relative;
+        list-style: none;
+        cursor: pointer;
+        padding: 20px 24px;
+      }
+      .card > summary::-webkit-details-marker {
+        display: none;
+      }
+      .card > summary:focus-visible {
+        outline: 1px solid var(--t4);
+        outline-offset: -3px;
+      }
+      .card .marker {
         position: absolute;
         left: 24px;
-        top: 21px;
+        top: 19px;
         color: var(--t4);
         font-weight: 700;
+        transition: transform 0.16s ease;
+      }
+      .card[open] > summary {
+        padding-bottom: 2px;
+      }
+      .card[open] .marker {
+        transform: rotate(90deg);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .card .marker {
+          transition: none;
+        }
       }
       .card h3 {
         font-size: 16px;
@@ -265,16 +306,21 @@
       }
       .card h3 a {
         color: var(--ink);
-        text-decoration: none;
+        text-decoration-color: var(--t5);
+        text-underline-offset: 3px;
       }
       .card h3 a:hover {
         color: var(--t2);
       }
       .card .meta {
+        display: block;
         font-size: 12.5px;
         color: var(--faint);
-        margin: 1px 0 12px;
+        margin-top: 1px;
         padding-left: 22px;
+      }
+      .card-body {
+        padding: 12px 24px 22px;
       }
       .card p {
         font-size: 14px;
@@ -329,9 +375,31 @@
     <nav>
       <div class="left"><span class="brand">~/subev</span></div>
       <div class="right">
-        <a href="cv.pdf">cv</a>
-        <a href="https://github.com/subev">github</a>
-        <a href="https://www.linkedin.com/in/subev/">linkedin</a>
+        <a href="#projects"
+          ><svg
+            class="chev"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 5v14M5 12l7 7 7-7" /></svg
+          >projects</a
+        >
+        <a href="cv.pdf" target="_blank" rel="noopener">cv</a>
+        <a href="https://github.com/subev" target="_blank" rel="noopener"
+          >github</a
+        >
+        <a
+          href="https://www.linkedin.com/in/subev/"
+          target="_blank"
+          rel="noopener"
+          >linkedin</a
+        >
         <a href="#" class="mailme">email</a>
         <a
           href="#"
@@ -351,167 +419,319 @@
         <div class="term-body" id="termBody"></div>
       </section>
 
-      <h2><span class="prompt">~ $</span> <span class="cmd">ls work/</span></h2>
+      <h2 id="work">
+        <span class="prompt">~ $</span> <span class="cmd">ls work/</span>
+      </h2>
       <hr class="rule" />
 
-      <div class="card">
-        <h3><a href="https://jest.com">jest.com</a></h3>
-        <div class="meta">senior full-stack engineer · 2025 – present</div>
-        <p>
-          A consumer platform for mobile web games. I turn designs into the
-          living product — everything you see and tap there, plus the backend
-          behind it: the
-          <b>real-time chat system</b> (WebSockets, cursor pagination,
-          presence), <b>unified Stripe checkout</b> on a credit-balance model,
-          <b>passkey auth</b>, and the PWA layer that makes a web app feel
-          native. 213 production PRs in the first 8 months, working agent-first
-          with Claude Code, kept honest with end-to-end types and tests.
-        </p>
-        <div class="stack">
-          <span>react 19</span><span>ssr</span><span>fastify</span
-          ><span>trpc</span><span>postgresql</span><span>posthog</span
-          ><span>stripe</span><span>pwa</span>
+      <details class="card" open>
+        <summary>
+          <span class="marker" aria-hidden="true">❯</span>
+          <h3>
+            <a
+              href="https://jest.com"
+              class="ext"
+              target="_blank"
+              rel="noopener"
+              >jest.com</a
+            >
+          </h3>
+          <span class="meta">senior full-stack engineer · 2025 – present</span>
+        </summary>
+        <div class="card-body">
+          <p>
+            A consumer platform for mobile web games. I turn designs into the
+            living product — everything you see and tap there, plus the backend
+            behind it: the
+            <b>real-time chat system</b> (WebSockets, cursor pagination,
+            presence), <b>unified Stripe checkout</b> on a credit-balance model,
+            <b>passkey auth</b>, and the PWA layer that makes a web app feel
+            native. 213 production PRs in the first 8 months, working
+            agent-first with Claude Code, kept honest with end-to-end types and
+            tests.
+          </p>
+          <div class="stack">
+            <span>react 19</span><span>ssr</span><span>fastify</span
+            ><span>trpc</span><span>postgresql</span><span>posthog</span
+            ><span>stripe</span><span>pwa</span>
+          </div>
         </div>
-      </div>
+      </details>
 
-      <div class="card">
-        <h3><a href="https://powertime.org">powertime.org</a></h3>
-        <div class="meta">founding product engineer · 2025</div>
-        <p>
-          Real-time collaboration and group-governance platform — web app plus
-          an Electron desktop app for three OSes, built as the
-          <b>sole frontend engineer</b>. Typed WebSocket layer generated from
-          OpenAPI schemas; CI boots the real Clojure/Datomic backend on every PR
-          to typecheck the frontend against the live API contract.
-        </p>
-        <div class="stack">
-          <span>vue 3</span><span>typescript</span><span>pinia</span
-          ><span>electron</span><span>websockets</span><span>openapi</span>
+      <details class="card">
+        <summary>
+          <span class="marker" aria-hidden="true">❯</span>
+          <h3>
+            <a
+              href="https://powertime.org"
+              class="ext"
+              target="_blank"
+              rel="noopener"
+              >powertime.org</a
+            >
+          </h3>
+          <span class="meta">founding product engineer · 2025</span>
+        </summary>
+        <div class="card-body">
+          <p>
+            Real-time collaboration and group-governance platform — web app plus
+            an Electron desktop app for three OSes, built as the
+            <b>sole frontend engineer</b>. Typed WebSocket layer generated from
+            OpenAPI schemas; CI boots the real Clojure/Datomic backend on every
+            PR to typecheck the frontend against the live API contract.
+          </p>
+          <div class="stack">
+            <span>vue 3</span><span>typescript</span><span>pinia</span
+            ><span>electron</span><span>websockets</span><span>openapi</span>
+          </div>
         </div>
-      </div>
+      </details>
 
-      <div class="card">
-        <h3>
-          <a href="https://www.v7labs.com/">v7 go</a> &amp;
-          <a href="https://www.v7darwin.com/">v7 darwin</a>
-        </h3>
-        <div class="meta">staff frontend engineer, v7 · 2022 – 2024</div>
-        <p>
-          On V7 Go, built the heart of the product: a
-          <b>Google-Sheets-like table where every cell is computed by AI</b> —
-          kept responsive on huge datasets by forking and customizing a virtual
-          scroller. Also the Entity View, a markdown editor with mention
-          autocomplete, and the signup/growth tooling. On Darwin, built the
-          consensus-review UI for multi-annotator quality control and carried a
-          large share of the Vue 2 → Vue 3 migration.
-        </p>
-        <div class="stack">
-          <span>vue 3</span><span>typescript</span><span>virtualization</span
-          ><span>tailwind</span><span>playwright</span>
+      <details class="card">
+        <summary>
+          <span class="marker" aria-hidden="true">❯</span>
+          <h3>
+            <a
+              href="https://www.v7labs.com/"
+              class="ext"
+              target="_blank"
+              rel="noopener"
+              >v7 go</a
+            >
+            &amp;
+            <a
+              href="https://www.v7darwin.com/"
+              class="ext"
+              target="_blank"
+              rel="noopener"
+              >v7 darwin</a
+            >
+          </h3>
+          <span class="meta">staff frontend engineer, v7 · 2022 – 2024</span>
+        </summary>
+        <div class="card-body">
+          <p>
+            On V7 Go, built the heart of the product: a
+            <b>Google-Sheets-like table where every cell is computed by AI</b> —
+            kept responsive on huge datasets by forking and customizing a
+            virtual scroller. Also the Entity View, a markdown editor with
+            mention autocomplete, and the signup/growth tooling. On Darwin,
+            built the consensus-review UI for multi-annotator quality control
+            and carried a large share of the Vue 2 → Vue 3 migration.
+          </p>
+          <div class="stack">
+            <span>vue 3</span><span>typescript</span><span>virtualization</span
+            ><span>tailwind</span><span>playwright</span>
+          </div>
         </div>
-      </div>
+      </details>
 
-      <div class="card">
-        <h3><a href="https://www.leanplum.com/">leanplum</a> (clevertap)</h3>
-        <div class="meta">staff engineer / frontend lead · 2015 – 2021</div>
-        <p>
-          Mobile marketing-automation platform for enterprise customers like
-          <b>Tinder, Tesco, and Lyft</b>. Joined as the first frontend-focused
-          engineer and owned the web dashboard for six years: drove two complete
-          migrations (jQuery/Backbone → Angular → Vue + TSX + TypeScript)
-          <b>without pausing feature delivery</b>, laid the foundation of the
-          next-generation dashboard, and crossed the stack to rewrite the
-          analytics module as a Spring Boot service speaking Protocol Buffers
-          over custom RPC. Onboarded and mentored engineers as the frontend team
-          formed around me.
-        </p>
-        <div class="stack">
-          <span>vue + tsx</span><span>angular</span><span>typescript</span
-          ><span>vuex</span><span>spring boot</span><span>protobuf</span>
+      <details class="card">
+        <summary>
+          <span class="marker" aria-hidden="true">❯</span>
+          <h3>
+            <a
+              href="https://www.hyperscience.com/"
+              class="ext"
+              target="_blank"
+              rel="noopener"
+              >hyperscience</a
+            >
+          </h3>
+          <span class="meta">staff software engineer · 2021 – 2022</span>
+        </summary>
+        <div class="card-body">
+          <p>
+            An enterprise ML platform that turns documents into structured data.
+            I built the <b>human-in-the-loop annotation tooling</b> in React and
+            TypeScript — labeling rows and cells directly over scanned
+            documents, with live model predictions fed into the flow so
+            annotators corrected the machine instead of labeling from zero.
+            Faster and more accurate at the same time. Also grew the component
+            library shared across product teams and mentored the people building
+            on it.
+          </p>
+          <div class="stack">
+            <span>react</span><span>typescript</span><span>django</span
+            ><span>ml tooling</span>
+          </div>
         </div>
-      </div>
+      </details>
 
-      <div class="card">
-        <h3>earlier: hyperscience · kendo ui</h3>
-        <div class="meta">2011 – 2015 · 2021 – 2022</div>
-        <p>
-          Human-in-the-loop ML annotation tooling at
-          <a href="https://www.hyperscience.com/">Hyperscience</a> — labeling
-          rows and cells over scanned documents with live model predictions fed
-          in. And where it started: building
-          <a href="https://www.telerik.com/kendo-ui">Kendo UI</a> components
-          used by thousands of .NET developers — the origin of a 20k-reputation
-          Stack Overflow profile.
-        </p>
-        <div class="stack">
-          <span>react</span><span>django</span><span>jquery</span
-          ><span>asp.net mvc</span>
+      <details class="card">
+        <summary>
+          <span class="marker" aria-hidden="true">❯</span>
+          <h3>
+            <a
+              href="https://www.leanplum.com/"
+              class="ext"
+              target="_blank"
+              rel="noopener"
+              >leanplum</a
+            >
+            (clevertap)
+          </h3>
+          <span class="meta">staff engineer / frontend lead · 2015 – 2021</span>
+        </summary>
+        <div class="card-body">
+          <p>
+            Mobile marketing-automation platform for enterprise customers like
+            <b>Tinder, Tesco, and Lyft</b>. Joined as the first frontend-focused
+            engineer and owned the web dashboard for six years: drove two
+            complete migrations (jQuery/Backbone → Angular → Vue + TSX +
+            TypeScript) <b>without pausing feature delivery</b>, laid the
+            foundation of the next-generation dashboard, and crossed the stack
+            to rewrite the analytics module as a Spring Boot service speaking
+            Protocol Buffers over custom RPC. Onboarded and mentored engineers
+            as the frontend team formed around me.
+          </p>
+          <div class="stack">
+            <span>vue + tsx</span><span>angular</span><span>typescript</span
+            ><span>vuex</span><span>spring boot</span><span>protobuf</span>
+          </div>
         </div>
-      </div>
+      </details>
 
-      <h2>
+      <details class="card">
+        <summary>
+          <span class="marker" aria-hidden="true">❯</span>
+          <h3>
+            where it started:
+            <a
+              href="https://www.telerik.com/kendo-ui"
+              class="ext"
+              target="_blank"
+              rel="noopener"
+              >kendo ui</a
+            >
+          </h3>
+          <span class="meta">software developer, telerik · 2011 – 2015</span>
+        </summary>
+        <div class="card-body">
+          <p>
+            Owning components end to end in one of the most widely used
+            JavaScript UI suites on the web — research, design, implementation,
+            tests, maintenance — plus their ASP.NET MVC server-side wrappers. I
+            wrote the public docs and answered developers by ticket and phone,
+            which is also
+            <b>the origin of a 20k-reputation Stack Overflow profile</b>.
+            Thousands of .NET developers shipped on those components.
+          </p>
+          <div class="stack">
+            <span>javascript</span><span>jquery</span><span>kendo ui</span
+            ><span>asp.net mvc</span>
+          </div>
+        </div>
+      </details>
+
+      <h2 id="projects">
         <span class="prompt">~ $</span> <span class="cmd">ls projects/</span>
       </h2>
       <hr class="rule" />
 
-      <div class="card">
-        <h3><a href="https://github.com/subev/pdf2audio">pdf2audio</a></h3>
-        <div class="meta">side project · open source · demo videos in the README</div>
-        <p>
-          A <b>personal audiobook library you live in</b>, running fully
-          offline on Apple Silicon. PDFs in → chapter-marked M4B audiobooks
-          out, via local TTS (Kokoro and friends) with AI chapter detection
-          and OCR cleanup. Then the fun part: <b>chat with your whole
-          library</b> — an agentic assistant over hybrid full-text + semantic
-          search (local embeddings, ask in English, find the Bulgarian
-          passage) that streams answers with <b>verified citations</b>
-          linking straight to the page. Per-chapter <b>translations and AI
-          rewrites</b> (ELI5, summaries, custom prompts) stream in token by
-          token and get their own audio, and synced EPUBs give you
-          <b>read-along with sentence-level highlighting</b> on your phone.
-        </p>
-        <div class="stack">
-          <span>typescript</span><span>local llms</span><span>rag</span
-          ><span>pgvector</span><span>kokoro tts</span><span>epub media
-          overlays</span>
+      <details class="card" open>
+        <summary>
+          <span class="marker" aria-hidden="true">❯</span>
+          <h3>
+            <a
+              href="https://github.com/subev/pdf2audio"
+              class="ext"
+              target="_blank"
+              rel="noopener"
+              >pdf2audio</a
+            >
+          </h3>
+          <span class="meta"
+            >side project · open source · demo videos in the README</span
+          >
+        </summary>
+        <div class="card-body">
+          <p>
+            A <b>personal audiobook library you live in</b>, running fully
+            offline on Apple Silicon. PDFs in → chapter-marked M4B audiobooks
+            out, via local TTS (Kokoro and friends) with AI chapter detection
+            and OCR cleanup. Then the fun part:
+            <b>chat with your whole library</b> — an agentic assistant over
+            hybrid full-text + semantic search (local embeddings, ask in
+            English, find the Bulgarian passage) that streams answers with
+            <b>verified citations</b> linking straight to the page. Per-chapter
+            <b>translations and AI rewrites</b> (ELI5, summaries, custom
+            prompts) stream in token by token and get their own audio, and
+            synced EPUBs give you
+            <b>read-along with sentence-level highlighting</b> on your phone.
+          </p>
+          <div class="stack">
+            <span>typescript</span><span>local llms</span><span>rag</span
+            ><span>pgvector</span><span>kokoro tts</span
+            ><span>epub media overlays</span>
+          </div>
         </div>
-      </div>
+      </details>
 
-      <div class="card">
-        <h3><a href="https://subev.github.io/awesome-stars/">awesome-stars</a></h3>
-        <div class="meta">side project · live</div>
-        <p>
-          Curated awesome lists enriched with <b>live GitHub star counts and
-          trend history</b> — see which neovim plugins, node libraries, or
-          macOS apps are actually gaining traction. Fully static: a GitHub
-          Actions cron refetches thousands of repos weekly, commits the
-          snapshots to git, and prerenders the whole site onto GitHub Pages —
-          no server, no database.
-        </p>
-        <div class="stack">
-          <span>react router 7</span><span>static prerender</span
-          ><span>github actions</span><span>github pages</span>
+      <details class="card">
+        <summary>
+          <span class="marker" aria-hidden="true">❯</span>
+          <h3>
+            <a
+              href="https://subev.github.io/awesome-stars/"
+              class="ext"
+              target="_blank"
+              rel="noopener"
+              >awesome-stars</a
+            >
+          </h3>
+          <span class="meta">side project · live</span>
+        </summary>
+        <div class="card-body">
+          <p>
+            Curated awesome lists enriched with
+            <b>live GitHub star counts and trend history</b> — see which neovim
+            plugins, node libraries, or macOS apps are actually gaining
+            traction. Fully static: a GitHub Actions cron refetches thousands of
+            repos weekly, commits the snapshots to git, and prerenders the whole
+            site onto GitHub Pages — no server, no database.
+          </p>
+          <div class="stack">
+            <span>react router 7</span><span>static prerender</span
+            ><span>github actions</span><span>github pages</span>
+          </div>
         </div>
-      </div>
+      </details>
 
       <h2>
         <span class="prompt">~ $</span> <span class="cmd">ls community/</span>
       </h2>
       <hr class="rule" />
       <p class="community">
-        <a href="https://stackoverflow.com/users/332124"
+        <a
+          href="https://stackoverflow.com/users/332124"
+          class="ext"
+          target="_blank"
+          rel="noopener"
           >20k+ stack overflow reputation</a
         >
         (top answerer for kendo ui) ·
-        <a href="https://www.toptal.com/resume/petur-subev"
+        <a
+          href="https://www.toptal.com/resume/petur-subev"
+          class="ext"
+          target="_blank"
+          rel="noopener"
           >toptal verified expert</a
         >
         ·
-        <a href="https://www.codementor.io/@subev"
+        <a
+          href="https://www.codementor.io/@subev"
+          class="ext"
+          target="_blank"
+          rel="noopener"
           >5.0★ codementor mentor since 2014</a
         >
         ·
-        <a href="https://github.com/subev/sibling-jump.nvim"
+        <a
+          href="https://github.com/subev/sibling-jump.nvim"
+          class="ext"
+          target="_blank"
+          rel="noopener"
           >sibling-jump.nvim</a
         >
         (tree-sitter navigation for neovim)
@@ -520,7 +740,7 @@
       <footer>
         <span class="prompt">~ $</span> mail
         <a href="#" class="mailme">[click to reveal]</a> · sofia, bulgaria ·
-        <a href="cv.pdf">cv.pdf</a>
+        <a href="cv.pdf" class="ext" target="_blank" rel="noopener">cv.pdf</a>
       </footer>
     </div>
 
@@ -574,7 +794,7 @@
           },
           {
             cmd: "cat now.txt",
-            out: 'turning designs into a living product at <a href="https://jest.com">jest.com</a>\nworking agent-first with claude code, kept honest with\nend-to-end types and tests',
+            out: 'turning designs into a living product at <a href="https://jest.com" class="ext" target="_blank" rel="noopener">jest.com</a>\nworking agent-first with claude code, kept honest with\nend-to-end types and tests',
           },
           {
             cmd: "pwd",
