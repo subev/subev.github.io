@@ -6,7 +6,7 @@
     <title>petur subev — product engineer</title>
     <meta
       name="description"
-      content="Staff-level product engineer, 15 years in startups. Frontend-deep, full-stack current. Sofia, Bulgaria."
+      content="Staff-level product engineer, 15 years in startups. Frontend-deep, full-stack current. Builds his own tools: neovim plugins, an offline audiobook studio, a star-ranked github index. Sofia, Bulgaria."
     />
     <link
       rel="icon"
@@ -28,6 +28,9 @@
         --t6: #8fdcbd;
         --rain-opacity: 0.1;
         --term-shadow: 0 12px 40px rgba(15, 107, 102, 0.08);
+        --pop-shadow: 0 14px 34px rgba(15, 107, 102, 0.18);
+        --pulse-0: rgba(35, 160, 127, 0);
+        --pulse-1: rgba(35, 160, 127, 0.16);
         --glow: none;
       }
       html[data-theme="dark"] {
@@ -45,6 +48,9 @@
         --t6: #a5f4d1;
         --rain-opacity: 0.16;
         --term-shadow: 0 12px 48px rgba(63, 220, 156, 0.07);
+        --pop-shadow: 0 14px 38px rgba(0, 0, 0, 0.55);
+        --pulse-0: rgba(63, 220, 156, 0);
+        --pulse-1: rgba(63, 220, 156, 0.2);
         --glow: 0 0 8px rgba(63, 220, 156, 0.45);
       }
       html[data-theme="dark"] body {
@@ -345,6 +351,192 @@
         border: 1px solid var(--line);
       }
 
+      /* project stories — buzz in when you ask why */
+      .proj {
+        position: relative;
+        margin-bottom: 12px;
+      }
+      .proj > .card {
+        margin-bottom: 0;
+      }
+      .proj.on {
+        z-index: 30;
+      }
+      .proj.on > .card {
+        border-color: var(--t4);
+      }
+      .proj > .card > summary {
+        padding-right: 76px;
+      }
+      .why {
+        position: absolute;
+        top: 17px;
+        right: 18px;
+        z-index: 2;
+        font: inherit;
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        padding: 3px 10px;
+        cursor: pointer;
+        color: var(--faint);
+        background: var(--card);
+        border: 1px solid var(--line);
+        animation: why-pulse 2.6s ease-in-out infinite;
+      }
+      .why:hover {
+        color: var(--t4);
+        border-color: var(--t4);
+        animation: chip-buzz 0.18s steps(2) 2;
+      }
+      .why:focus-visible {
+        outline: 1px solid var(--t4);
+        outline-offset: 2px;
+      }
+      .proj.on .why {
+        color: var(--t4);
+        border-color: var(--t4);
+        animation: none;
+      }
+      @keyframes why-pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 var(--pulse-0);
+        }
+        50% {
+          box-shadow: 0 0 0 4px var(--pulse-1);
+          color: var(--t4);
+          border-color: var(--t4);
+        }
+      }
+      @keyframes chip-buzz {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        20% {
+          transform: translate(-1px, 1px);
+        }
+        45% {
+          transform: translate(1px, -1px);
+        }
+        70% {
+          transform: translate(-1px, 0);
+        }
+      }
+
+      .pop {
+        display: none;
+        margin-top: 10px;
+      }
+      .proj.on .pop {
+        display: block;
+        animation: buzz-in 0.44s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+      }
+      .pop-in {
+        position: relative;
+        display: block;
+        background: var(--card);
+        border: 1px solid var(--t4);
+        box-shadow: var(--pop-shadow);
+        padding: 16px 20px 18px;
+      }
+      .pop-close {
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        font: inherit;
+        font-size: 14px;
+        line-height: 1;
+        padding: 4px 6px;
+        cursor: pointer;
+        color: var(--faint);
+        background: none;
+        border: 0;
+      }
+      .pop-close:hover {
+        color: var(--t4);
+      }
+      .pop h4 {
+        font-size: 12.5px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        color: var(--t3);
+        margin-bottom: 8px;
+      }
+      .pop h4 .hash {
+        color: var(--faint);
+        font-weight: 400;
+      }
+      .pop p {
+        font-size: 13.5px;
+        color: var(--muted);
+        max-width: 64ch;
+      }
+      .pop p b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      @keyframes buzz-in {
+        0% {
+          opacity: 0;
+          transform: translate3d(-20px, 18px, 0) scale(0.92) rotate(-1.6deg);
+        }
+        28% {
+          opacity: 1;
+          transform: translate3d(4px, -5px, 0) scale(1.025) rotate(0.8deg);
+        }
+        42% {
+          transform: translate3d(-5px, 3px, 0) scale(0.995) rotate(-0.7deg);
+        }
+        54% {
+          transform: translate3d(4px, -3px, 0) rotate(0.5deg);
+        }
+        65% {
+          transform: translate3d(-3px, 2px, 0) rotate(-0.36deg);
+        }
+        75% {
+          transform: translate3d(2px, -2px, 0) rotate(0.24deg);
+        }
+        84% {
+          transform: translate3d(-2px, 1px, 0) rotate(-0.15deg);
+        }
+        92% {
+          transform: translate3d(1px, -1px, 0) rotate(0.08deg);
+        }
+        100% {
+          opacity: 1;
+          transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .why,
+        .why:hover,
+        .proj.on .pop {
+          animation: none;
+        }
+      }
+
+      .links {
+        margin-top: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .links a {
+        font-size: 11px;
+        padding: 3px 9px;
+        color: var(--t2);
+        background: var(--card);
+        border: 1px solid var(--line);
+        text-decoration: none;
+        letter-spacing: 0.03em;
+      }
+      .links a:hover {
+        color: var(--t4);
+        border-color: var(--t4);
+      }
+
       .community {
         color: var(--muted);
         font-size: 14px;
@@ -629,74 +821,236 @@
       </h2>
       <hr class="rule" />
 
-      <details class="card" open>
-        <summary>
-          <span class="marker" aria-hidden="true">❯</span>
-          <h3>
-            <a
-              href="https://github.com/subev/pdf2audio"
-              class="ext"
-              target="_blank"
-              rel="noopener"
-              >pdf2audio</a
+      <div class="proj">
+        <details class="card" open>
+          <summary>
+            <span class="marker" aria-hidden="true">❯</span>
+            <h3>
+              <a
+                href="https://github.com/subev/pdf2audio"
+                class="ext"
+                target="_blank"
+                rel="noopener"
+                >pdf2audio</a
+              >
+            </h3>
+            <span class="meta"
+              >side project · open source · demo videos in the README</span
             >
-          </h3>
-          <span class="meta"
-            >side project · open source · demo videos in the README</span
-          >
-        </summary>
-        <div class="card-body">
-          <p>
-            A <b>personal audiobook library you live in</b>, running fully
-            offline on Apple Silicon. PDFs in → chapter-marked M4B audiobooks
-            out, via local TTS (Kokoro and friends) with AI chapter detection
-            and OCR cleanup. Then the fun part:
-            <b>chat with your whole library</b> — an agentic assistant over
-            hybrid full-text + semantic search (local embeddings, ask in
-            English, find the Bulgarian passage) that streams answers with
-            <b>verified citations</b> linking straight to the page. Per-chapter
-            <b>translations and AI rewrites</b> (ELI5, summaries, custom
-            prompts) stream in token by token and get their own audio, and
-            synced EPUBs give you
-            <b>read-along with sentence-level highlighting</b> on your phone.
-          </p>
-          <div class="stack">
-            <span>typescript</span><span>local llms</span><span>rag</span
-            ><span>pgvector</span><span>kokoro tts</span
-            ><span>epub media overlays</span>
+          </summary>
+          <div class="card-body">
+            <p>
+              A <b>personal audiobook library you live in</b>, running fully
+              offline on Apple Silicon. PDFs in → chapter-marked M4B audiobooks
+              out, via local TTS (Kokoro and friends) with AI chapter detection
+              and OCR cleanup. Then the fun part:
+              <b>chat with your whole library</b> — an agentic assistant over
+              hybrid full-text + semantic search (local embeddings, ask in
+              English, find the Bulgarian passage) that streams answers with
+              <b>verified citations</b> linking straight to the page.
+              Per-chapter <b>translations and AI rewrites</b> (ELI5, summaries,
+              custom prompts) stream in token by token and get their own audio,
+              and synced EPUBs give you
+              <b>read-along with sentence-level highlighting</b> on your phone.
+            </p>
+            <div class="stack">
+              <span>typescript</span><span>local llms</span><span>rag</span
+              ><span>pgvector</span><span>kokoro tts</span
+              ><span>epub media overlays</span>
+            </div>
+          </div>
+        </details>
+        <button
+          type="button"
+          class="why"
+          aria-expanded="false"
+          aria-controls="why-pdf2audio"
+        >
+          why?
+        </button>
+        <div class="pop" id="why-pdf2audio" role="note">
+          <div class="pop-in">
+            <button type="button" class="pop-close" aria-label="Close">
+              ✕
+            </button>
+            <h4><span class="hash">#</span> why i built it</h4>
+            <p>
+              My time at a desk is limited and I'm on the go a lot, so I keep
+              educating myself by <b>listening</b>. The catch: the things I
+              actually want in my ears — a dense PDF, a paper, a Bulgarian book
+              — have no audiobook and never will. Building an entire TTS studio
+              to avoid reading a 400-page PDF is, of course, far more work than
+              reading it — which is precisely the trade I keep making, except
+              now every PDF I own is an audiobook, narrated overnight, offline
+              and free. The same pipeline also gives me a
+              <b>daily Hacker News podcast</b>: a script pulls the day's top
+              stories, extracts the articles, keeps the comment-section drama to
+              a strict 20% of the airtime, and it's on my phone by the time I'm
+              out the door.
+            </p>
+            <div class="links">
+              <a
+                href="https://youtu.be/fmIiWdthnfg"
+                class="ext"
+                target="_blank"
+                rel="noopener"
+                >demo: the api &amp; the hn podcast</a
+              >
+            </div>
           </div>
         </div>
-      </details>
+      </div>
 
-      <details class="card">
-        <summary>
-          <span class="marker" aria-hidden="true">❯</span>
-          <h3>
-            <a
-              href="https://subev.github.io/awesome-stars/"
-              class="ext"
-              target="_blank"
-              rel="noopener"
-              >awesome-stars</a
-            >
-          </h3>
-          <span class="meta">side project · live</span>
-        </summary>
-        <div class="card-body">
-          <p>
-            Curated awesome lists enriched with
-            <b>live GitHub star counts and trend history</b> — see which neovim
-            plugins, node libraries, or macOS apps are actually gaining
-            traction. Fully static: a GitHub Actions cron refetches thousands of
-            repos weekly, commits the snapshots to git, and prerenders the whole
-            site onto GitHub Pages — no server, no database.
-          </p>
-          <div class="stack">
-            <span>react router 7</span><span>static prerender</span
-            ><span>github actions</span><span>github pages</span>
+      <div class="proj">
+        <details class="card">
+          <summary>
+            <span class="marker" aria-hidden="true">❯</span>
+            <h3>
+              <a
+                href="https://github.com/subev/sibling-jump.nvim"
+                class="ext"
+                target="_blank"
+                rel="noopener"
+                >sibling-jump.nvim</a
+              >
+            </h3>
+            <span class="meta">side project · listed in awesome-neovim</span>
+          </summary>
+          <div class="card-body">
+            <p>
+              A Neovim plugin for <b>tree-sitter-aware code navigation</b>: one
+              keystroke to hop between siblings at the same nesting level —
+              statements, object properties, array elements, function arguments,
+              JSX attributes, links in a method chain, branches of an if/else —
+              instead of hunting with search. A second keybinding cycles a
+              block's structural boundaries and selects it in visual mode.
+              Written in Lua, tested, and works across TypeScript, JSX, Lua,
+              Python, C# and more.
+            </p>
+            <div class="stack">
+              <span>lua</span><span>neovim</span><span>tree-sitter</span>
+            </div>
+          </div>
+        </details>
+        <button
+          type="button"
+          class="why"
+          aria-expanded="false"
+          aria-controls="why-sibling-jump"
+        >
+          why?
+        </button>
+        <div class="pop" id="why-sibling-jump" role="note">
+          <div class="pop-in">
+            <button type="button" class="pop-close" aria-label="Close">
+              ✕
+            </button>
+            <h4><span class="hash">#</span> why i built it</h4>
+            <p>
+              Fifteen years in, I still haven't managed to quit vim — and not
+              for lack of trying. The evidence is a
+              <b>dotfiles repo I've been committing to since 2013</b>: ~270
+              commits, 6k lines of Lua, and a test suite, because at some point
+              a config gets big enough to have bugs of its own. Agentic coding
+              didn't get me out either; if anything it made the editor matter
+              more. Something still has to be read, and reading code is mostly
+              <b>navigating</b> it — so this exists, and so does my fork of
+              <b>difftastic.nvim</b>, which shows structural diffs side by side
+              instead of line noise. Two of those patches are merged upstream.
+              Difftastic itself is genuinely awesome, by the way — go use it.
+            </p>
+            <div class="links">
+              <a
+                href="https://github.com/subev/dotfiles"
+                class="ext"
+                target="_blank"
+                rel="noopener"
+                >dotfiles</a
+              ><a
+                href="https://github.com/subev/difftastic.nvim"
+                class="ext"
+                target="_blank"
+                rel="noopener"
+                >difftastic.nvim</a
+              ><a
+                href="https://github.com/subev/neotest-playwright-e2e"
+                class="ext"
+                target="_blank"
+                rel="noopener"
+                >neotest-playwright-e2e</a
+              >
+            </div>
           </div>
         </div>
-      </details>
+      </div>
+
+      <div class="proj">
+        <details class="card">
+          <summary>
+            <span class="marker" aria-hidden="true">❯</span>
+            <h3>
+              <a
+                href="https://subev.github.io/awesome-stars/"
+                class="ext"
+                target="_blank"
+                rel="noopener"
+                >awesome-stars</a
+              >
+            </h3>
+            <span class="meta">side project · live</span>
+          </summary>
+          <div class="card-body">
+            <p>
+              Curated awesome lists enriched with
+              <b>live GitHub star counts and trend history</b> — see which
+              neovim plugins, node libraries, or macOS apps are actually gaining
+              traction. Fully static: a GitHub Actions cron refetches thousands
+              of repos weekly, commits the snapshots to git, and prerenders the
+              whole site onto GitHub Pages — no server, no database.
+            </p>
+            <div class="stack">
+              <span>react router 7</span><span>static prerender</span
+              ><span>github actions</span><span>github pages</span>
+            </div>
+          </div>
+        </details>
+        <button
+          type="button"
+          class="why"
+          aria-expanded="false"
+          aria-controls="why-awesome-stars"
+        >
+          why?
+        </button>
+        <div class="pop" id="why-awesome-stars" role="note">
+          <div class="pop-in">
+            <button type="button" class="pop-close" aria-label="Close">
+              ✕
+            </button>
+            <h4><span class="hash">#</span> why i built it</h4>
+            <p>
+              I browse GitHub the way other people browse a bookshop, and
+              <b>awesome lists</b> are the best possible entry point — right up
+              until you open one. A thousand links in alphabetical order, every
+              single one of them "awesome", a good share abandoned years ago,
+              and nothing to tell you which ones the community actually
+              converged on. So this one re-hydrates any awesome list with
+              <b>live star counts and star history</b>: point it at a list and
+              it comes back ranked by traction, with trends showing what's
+              climbing and what quietly stopped.
+            </p>
+            <div class="links">
+              <a
+                href="https://github.com/subev/awesome-stars"
+                class="ext"
+                target="_blank"
+                rel="noopener"
+                >source</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
 
       <h2>
         <span class="prompt">~ $</span> <span class="cmd">ls community/</span>
@@ -726,15 +1080,6 @@
           rel="noopener"
           >5.0★ codementor mentor since 2014</a
         >
-        ·
-        <a
-          href="https://github.com/subev/sibling-jump.nvim"
-          class="ext"
-          target="_blank"
-          rel="noopener"
-          >sibling-jump.nvim</a
-        >
-        (tree-sitter navigation for neovim)
       </p>
 
       <footer>
@@ -861,6 +1206,37 @@
           }
           setTimeout(nextStep, 500);
         }
+
+        /* ---- project "why?" notes ---- */
+        var projs = [].slice.call(document.querySelectorAll(".proj"));
+        function closeNotes(keep) {
+          projs.forEach(function (proj) {
+            if (proj === keep) return;
+            proj.classList.remove("on");
+            proj.querySelector(".why").setAttribute("aria-expanded", "false");
+          });
+        }
+        projs.forEach(function (proj) {
+          var btn = proj.querySelector(".why");
+          btn.addEventListener("click", function () {
+            var open = proj.classList.toggle("on");
+            btn.setAttribute("aria-expanded", String(open));
+            if (open) closeNotes(proj);
+          });
+          proj
+            .querySelector(".pop-close")
+            .addEventListener("click", function () {
+              proj.classList.remove("on");
+              btn.setAttribute("aria-expanded", "false");
+              btn.focus();
+            });
+        });
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") closeNotes(null);
+        });
+        document.addEventListener("click", function (e) {
+          if (!e.target.closest(".proj")) closeNotes(null);
+        });
 
         /* ---- pixel rain ---- */
         var canvas = document.getElementById("rain");
