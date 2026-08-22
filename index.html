@@ -158,10 +158,11 @@
       }
       html.booting .wrap > *:not(.term) {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(12px);
         transition:
-          opacity 560ms cubic-bezier(0.22, 1, 0.36, 1),
-          transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+          opacity 620ms ease calc(var(--i, 0) * 90ms),
+          transform 620ms cubic-bezier(0.22, 1, 0.36, 1)
+            calc(var(--i, 0) * 90ms);
       }
       html.booting.rest-in .wrap > *:not(.term) {
         opacity: 1;
@@ -1323,6 +1324,12 @@
               }
             })();
           }
+            [].slice
+            .call(document.querySelectorAll(".wrap > *:not(.term)"))
+            .forEach(function (el, i) {
+              el.style.setProperty("--i", Math.min(i, 7));
+            });
+
           var bootType =
             parseFloat(
               getComputedStyle(document.documentElement).getPropertyValue(
@@ -1716,7 +1723,9 @@
             resumeFromPointer = false;
             reseedCycle(wavePos, cycleDuration);
           }
-          waveCycleTime += dt;
+          // the sweep only counts once the field is visible, or the front is
+          // already mid-screen by the time anyone sees it
+          if (started) waveCycleTime += dt;
 
           var rawProgress = waveCycleTime / cycleDuration;
           var cycleIndex = Math.floor(rawProgress);
@@ -2131,6 +2140,20 @@
           attributes: true,
           attributeFilter: ["data-theme"],
         });
+
+        var started = !document.documentElement.classList.contains("booting");
+        if (!started) {
+          var bootWatch = new MutationObserver(function () {
+            if (!document.documentElement.classList.contains("field-in")) return;
+            started = true;
+            lastTime = 0;
+            bootWatch.disconnect();
+          });
+          bootWatch.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ["class"],
+          });
+        }
 
         requestAnimationFrame(render);
       })();
