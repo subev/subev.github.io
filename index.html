@@ -201,6 +201,18 @@
         padding: 20px 22px 24px;
         font-size: 14px;
         min-height: 300px;
+        display: grid;
+      }
+      .term-body > .layer {
+        grid-area: 1 / 1;
+      }
+      /* holds the full transcript so typing fills reserved space instead of
+         growing the card and reflowing everything below it */
+      .term-body > .ghost {
+        visibility: hidden;
+      }
+      .term-body > .ghost .cursor {
+        animation: none;
       }
       .term-body .ln {
         white-space: pre-wrap;
@@ -1140,47 +1152,63 @@
         ];
 
         var body = document.getElementById("termBody");
+        var ghost = document.createElement("div");
+        ghost.className = "layer ghost";
+        ghost.setAttribute("aria-hidden", "true");
+        var live = document.createElement("div");
+        live.className = "layer";
+        body.appendChild(ghost);
+        body.appendChild(live);
 
-        function promptLine() {
+        function promptLine(target) {
           var ln = document.createElement("div");
           ln.className = "ln";
           ln.innerHTML =
             '<span class="prompt">~ $ </span><span class="cmd"></span>';
-          body.appendChild(ln);
+          target.appendChild(ln);
           return ln.querySelector(".cmd");
         }
-        function outBlock(html) {
+        function outBlock(target, html) {
           var ln = document.createElement("div");
           ln.className = "ln out";
           ln.innerHTML = html.replace(/\n/g, "<br>");
-          body.appendChild(ln);
+          target.appendChild(ln);
         }
-        var cursor = document.createElement("span");
-        cursor.className = "cursor";
+        function endLine(target) {
+          var ln = document.createElement("div");
+          ln.className = "ln";
+          ln.innerHTML = '<span class="prompt">~ $ </span>';
+          target.appendChild(ln);
+          return ln;
+        }
+        function newCursor() {
+          var c = document.createElement("span");
+          c.className = "cursor";
+          return c;
+        }
+        var cursor = newCursor();
+
+        SESSION.forEach(function (step) {
+          promptLine(ghost).textContent = step.cmd;
+          outBlock(ghost, step.out);
+        });
+        endLine(ghost).appendChild(newCursor());
 
         if (reduced) {
           SESSION.forEach(function (step) {
-            promptLine().textContent = step.cmd;
-            outBlock(step.out);
+            promptLine(live).textContent = step.cmd;
+            outBlock(live, step.out);
           });
-          var end = document.createElement("div");
-          end.className = "ln";
-          end.innerHTML = '<span class="prompt">~ $ </span>';
-          end.appendChild(cursor);
-          body.appendChild(end);
+          endLine(live).appendChild(cursor);
         } else {
           var si = 0;
           function nextStep() {
             if (si >= SESSION.length) {
-              var end = document.createElement("div");
-              end.className = "ln";
-              end.innerHTML = '<span class="prompt">~ $ </span>';
-              end.appendChild(cursor);
-              body.appendChild(end);
+              endLine(live).appendChild(cursor);
               return;
             }
             var step = SESSION[si++];
-            var cmdEl = promptLine();
+            var cmdEl = promptLine(live);
             cmdEl.appendChild(cursor);
             var ci = 0;
             (function typeChar() {
@@ -1190,7 +1218,7 @@
               } else {
                 setTimeout(function () {
                   cursor.remove();
-                  outBlock(step.out);
+                  outBlock(live, step.out);
                   setTimeout(nextStep, 420);
                 }, 260);
               }
