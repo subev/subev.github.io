@@ -647,6 +647,8 @@
     </style>
     <script>
       (function () {
+        // the intro starts at the top; a restored scroll lands mid-page
+        if ("scrollRestoration" in history) history.scrollRestoration = "manual";
         var saved = localStorage.getItem("theme");
         document.documentElement.dataset.theme =
           saved === "light" ? "light" : "dark";
