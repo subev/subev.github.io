@@ -1368,7 +1368,6 @@
               if (reduced) return;
               e.preventDefault();
 
-              var startH = clip.offsetHeight;
               expanded = !expanded;
               if (expanded) card.open = true;
 
@@ -1378,8 +1377,10 @@
                 card.classList.toggle("shut", !expanded);
                 clip.style.height = (expanded ? body.offsetHeight : 0) + "px";
               } else {
+                // a closed details still reports its child at full height, so
+                // the collapsed start has to be stated, not measured
                 card.classList.toggle("shut", expanded);
-                clip.style.height = startH + "px";
+                clip.style.height = (expanded ? 0 : body.offsetHeight) + "px";
                 void clip.offsetHeight;
                 card.classList.add("animating");
                 card.classList.toggle("shut", !expanded);
