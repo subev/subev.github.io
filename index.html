@@ -1831,9 +1831,21 @@
         window.addEventListener("resize", function () {
           needsResize = true;
         });
+        function releasePointer() {
+          if (mouseActive) resumeFromPointer = true;
+          mouseActive = false;
+        }
+
+        // Only the empty margins steer the front. Over the content the pointer
+        // is reading or clicking, so the wave carries on by itself.
         window.addEventListener(
           "mousemove",
           function (e) {
+            var el = e.target;
+            if (el && el.closest && el.closest("nav, .wrap")) {
+              releasePointer();
+              return;
+            }
             mouseActive = true;
             mouseWavePos = vertical
               ? e.clientY / height
@@ -1841,10 +1853,7 @@
           },
           { passive: true },
         );
-        document.addEventListener("mouseleave", function () {
-          if (mouseActive) resumeFromPointer = true;
-          mouseActive = false;
-        });
+        document.addEventListener("mouseleave", releasePointer);
         document.addEventListener("visibilitychange", function () {
           paused = document.hidden;
           if (!paused) lastTime = 0;
