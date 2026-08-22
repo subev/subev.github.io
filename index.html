@@ -93,6 +93,27 @@
         color: var(--t4);
         text-decoration: none;
       }
+      #veil {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        background: var(--ground);
+        pointer-events: none;
+        animation: veil-out 900ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+      @keyframes veil-out {
+        to {
+          opacity: 0;
+          visibility: hidden;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #veil {
+          animation: none;
+          opacity: 0;
+          visibility: hidden;
+        }
+      }
       #field {
         position: fixed;
         inset: 0;
@@ -437,16 +458,31 @@
       }
 
       .pop {
-        display: none;
-        margin-top: 10px;
+        overflow: hidden;
+        max-height: 0;
+        margin-top: 0;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          max-height 460ms cubic-bezier(0.22, 1, 0.36, 1),
+          margin-top 460ms cubic-bezier(0.22, 1, 0.36, 1),
+          opacity 240ms ease,
+          visibility 0s linear 460ms;
       }
       .proj.on .pop {
-        display: block;
-        animation: buzz-in 0.44s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+        margin-top: 10px;
+        opacity: 1;
+        visibility: visible;
+        transition:
+          max-height 460ms cubic-bezier(0.22, 1, 0.36, 1),
+          margin-top 460ms cubic-bezier(0.22, 1, 0.36, 1),
+          opacity 320ms ease 60ms,
+          visibility 0s;
       }
       .pop-in {
         position: relative;
         display: block;
+        scroll-margin: 24px;
         background: var(--card);
         border: 1px solid var(--t4);
         box-shadow: var(--pop-shadow);
@@ -489,43 +525,14 @@
         font-weight: 600;
       }
 
-      @keyframes buzz-in {
-        0% {
-          opacity: 0;
-          transform: translate3d(-20px, 18px, 0) scale(0.92) rotate(-1.6deg);
-        }
-        28% {
-          opacity: 1;
-          transform: translate3d(4px, -5px, 0) scale(1.025) rotate(0.8deg);
-        }
-        42% {
-          transform: translate3d(-5px, 3px, 0) scale(0.995) rotate(-0.7deg);
-        }
-        54% {
-          transform: translate3d(4px, -3px, 0) rotate(0.5deg);
-        }
-        65% {
-          transform: translate3d(-3px, 2px, 0) rotate(-0.36deg);
-        }
-        75% {
-          transform: translate3d(2px, -2px, 0) rotate(0.24deg);
-        }
-        84% {
-          transform: translate3d(-2px, 1px, 0) rotate(-0.15deg);
-        }
-        92% {
-          transform: translate3d(1px, -1px, 0) rotate(0.08deg);
-        }
-        100% {
-          opacity: 1;
-          transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
-        }
-      }
       @media (prefers-reduced-motion: reduce) {
         .why,
-        .why:hover,
-        .proj.on .pop {
+        .why:hover {
           animation: none;
+        }
+        .pop,
+        .proj.on .pop {
+          transition: none;
         }
       }
 
@@ -574,6 +581,7 @@
     </script>
   </head>
   <body>
+    <div id="veil" aria-hidden="true"></div>
     <canvas id="field" aria-hidden="true"></canvas>
 
     <nav>
@@ -1229,24 +1237,64 @@
 
         /* ---- project "why?" notes ---- */
         var projs = [].slice.call(document.querySelectorAll(".proj"));
+        // clip only while the height animates, then release it so the note's
+        // shadow escapes and the height follows its content again
+        var noteTimers = new Map();
+        function setNoteHeight(proj, open) {
+          var pop = proj.querySelector(".pop");
+          clearTimeout(noteTimers.get(pop));
+          pop.style.overflow = "hidden";
+          pop.style.maxHeight = pop.scrollHeight + "px";
+          if (open) {
+            noteTimers.set(
+              pop,
+              setTimeout(function () {
+                if (!proj.classList.contains("on")) return;
+                pop.style.maxHeight = "none";
+                pop.style.overflow = "visible";
+              }, 500),
+            );
+          } else {
+            void pop.offsetHeight;
+            pop.style.maxHeight = "0px";
+          }
+        }
         function closeNotes(keep) {
           projs.forEach(function (proj) {
             if (proj === keep) return;
+            if (!proj.classList.contains("on")) return;
             proj.classList.remove("on");
+            setNoteHeight(proj, false);
             proj.querySelector(".why").setAttribute("aria-expanded", "false");
           });
         }
+        // after the expand settles, so the measurement is not mid-transition
+        function glideToNote(proj) {
+          setTimeout(function () {
+            if (!proj.classList.contains("on")) return;
+            proj.querySelector(".pop-in").scrollIntoView({
+              block: "nearest",
+              behavior: reduced ? "auto" : "smooth",
+            });
+          }, 480);
+        }
+
         projs.forEach(function (proj) {
           var btn = proj.querySelector(".why");
           btn.addEventListener("click", function () {
             var open = proj.classList.toggle("on");
             btn.setAttribute("aria-expanded", String(open));
-            if (open) closeNotes(proj);
+            setNoteHeight(proj, open);
+            if (open) {
+              closeNotes(proj);
+              glideToNote(proj);
+            }
           });
           proj
             .querySelector(".pop-close")
             .addEventListener("click", function () {
               proj.classList.remove("on");
+              setNoteHeight(proj, false);
               btn.setAttribute("aria-expanded", "false");
               btn.focus();
             });
@@ -1276,6 +1324,17 @@
         // ambient background: 60fps is plenty, and high-refresh displays would
         // otherwise pay double for motion nobody can see
         var MIN_FRAME_MS = 1000 / 60;
+        var SHOCK_LIFE = 1.3;
+        var SHOCK_SPEED = 620;
+        var SHOCK_FORCE = 11000;
+        var SHOCK_JITTER = 0.45;
+        var SHOCK_BAND = 140;
+        var FLASH_LIFE = 0.34;
+        var shocks = [];
+        // a click swaps which side of the front is ordered and which is chaos
+        var phaseFlip = 0;
+        var lastShockAt = -99;
+        var flashK = 0;
         var vertical = SWEEP_AXIS === "vertical";
 
         var THEMES = {
@@ -1532,7 +1591,7 @@
             autoPos = 1 - eased;
             waveDir = -1;
           }
-          wavePhase = cycleIndex % 4 < 2 ? 0 : 1;
+          wavePhase = (cycleIndex % 4 < 2 ? 0 : 1) ^ phaseFlip;
 
           // Pointer steers the boundary, but the front trails it instead of
           // snapping. Exponential so the lag is the same at any frame rate.
@@ -1546,6 +1605,18 @@
           var waveAt = wavePos * span;
           var transWidth = span * 0.12;
           var noiseT = time * 0.4;
+
+          flashK = Math.max(0, 1 - (time - lastShockAt) / FLASH_LIFE);
+
+          for (var q = shocks.length - 1; q >= 0; q--) {
+            var sAge = time - shocks[q].born;
+            if (sAge > SHOCK_LIFE) {
+              shocks.splice(q, 1);
+            } else {
+              shocks[q].r = SHOCK_SPEED * sAge;
+              shocks[q].k = 1 - sAge / SHOCK_LIFE;
+            }
+          }
 
           for (var i = 0; i < COUNT; i++) {
             var px = posX[i];
@@ -1592,6 +1663,21 @@
             if (speed > 300) {
               velX[i] = (velX[i] / speed) * 300;
               velY[i] = (velY[i] / speed) * 300;
+            }
+
+            for (var w = 0; w < shocks.length; w++) {
+              var sh = shocks[w];
+              var sdx = px - sh.x;
+              var sdy = py - sh.y;
+              var sdist = Math.sqrt(sdx * sdx + sdy * sdy) || 1;
+              var off = Math.abs(sdist - sh.r);
+              if (off > SHOCK_BAND) continue;
+              var fall = 1 - off / SHOCK_BAND;
+              var push = fall * fall * sh.k * SHOCK_FORCE * dt;
+              velX[i] += (sdx / sdist) * push;
+              velY[i] += (sdy / sdist) * push;
+              velX[i] += (Math.random() - 0.5) * push * SHOCK_JITTER;
+              velY[i] += (Math.random() - 0.5) * push * SHOCK_JITTER;
             }
 
             posX[i] += velX[i] * dt;
@@ -1841,6 +1927,12 @@
             }
           }
 
+          if (flashK > 0.001) {
+            ctx.fillStyle =
+              "rgba(" + P.band + "," + (flashK * flashK * 0.09).toFixed(3) + ")";
+            ctx.fillRect(0, 0, width, height);
+          }
+
           var maxDim = Math.max(width, height);
           var vg = ctx.createRadialGradient(
             cx, cy, maxDim * 0.3, cx, cy, maxDim * 0.85,
@@ -1882,6 +1974,15 @@
           { passive: true },
         );
         document.addEventListener("mouseleave", releasePointer);
+        window.addEventListener("click", function (e) {
+          var el = e.target;
+          if (el && el.closest && el.closest("nav, .wrap")) return;
+          var now = performance.now() / 1000;
+          shocks.push({ x: e.clientX, y: e.clientY, born: now });
+          if (shocks.length > 4) shocks.shift();
+          lastShockAt = now;
+          phaseFlip ^= 1;
+        });
         document.addEventListener("visibilitychange", function () {
           paused = document.hidden;
           if (!paused) lastTime = 0;
