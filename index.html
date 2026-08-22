@@ -99,6 +99,16 @@
         z-index: -1;
         opacity: var(--rain-opacity);
       }
+      #smoke {
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        pointer-events: none;
+        mix-blend-mode: multiply;
+      }
+      html[data-theme="dark"] #smoke {
+        mix-blend-mode: screen;
+      }
 
       nav {
         display: flex;
@@ -563,6 +573,7 @@
   </head>
   <body>
     <canvas id="rain" aria-hidden="true"></canvas>
+    <canvas id="smoke" aria-hidden="true"></canvas>
 
     <nav>
       <div class="left"><span class="brand">~/subev</span></div>
@@ -1305,6 +1316,232 @@
           }
         } else {
           requestAnimationFrame(frame);
+        }
+
+        /* ---- cursor smoke ---- */
+        var SMOKE_MAX = 12;
+        var SMOKE_LIFE = 1.8;
+        var SMOKE_GAP = 24;
+
+        var SMOKE_VERT = [
+          "attribute vec2 aPos;",
+          "void main() { gl_Position = vec4(aPos, 0.0, 1.0); }",
+        ].join("\n");
+
+        var SMOKE_FRAG = [
+          "precision highp float;",
+          "uniform float uTime;",
+          "uniform float uDpr;",
+          "uniform float uPoints[36];",
+          "uniform int uCount;",
+          "uniform vec3 uBase;",
+          "uniform vec3 uTint;",
+          "const int N = 12;",
+          "float hash3(vec3 p) {",
+          "  p = fract(p * 0.3183099 + 0.1);",
+          "  p *= 17.0;",
+          "  return fract(p.x * p.y * p.z * (p.x + p.y + p.z));",
+          "}",
+          "float noise3(vec3 x) {",
+          "  vec3 i = floor(x);",
+          "  vec3 f = fract(x);",
+          "  f = f * f * (3.0 - 2.0 * f);",
+          "  return mix(",
+          "    mix(mix(hash3(i + vec3(0,0,0)), hash3(i + vec3(1,0,0)), f.x),",
+          "        mix(hash3(i + vec3(0,1,0)), hash3(i + vec3(1,1,0)), f.x), f.y),",
+          "    mix(mix(hash3(i + vec3(0,0,1)), hash3(i + vec3(1,0,1)), f.x),",
+          "        mix(hash3(i + vec3(0,1,1)), hash3(i + vec3(1,1,1)), f.x), f.y), f.z);",
+          "}",
+          "float fbm(vec3 p) {",
+          "  float a = 0.5, s = 0.0;",
+          "  for (int i = 0; i < 3; i++) { s += a * noise3(p); p *= 2.05; a *= 0.5; }",
+          "  return s;",
+          "}",
+          "float shell(vec2 frag, vec2 c, float age) {",
+          "  float R = mix(34.0, 230.0, 1.0 - exp(-age * 1.5)) * uDpr;",
+          "  vec2 q = (frag - c) / R;",
+          "  float r = length(q);",
+          "  if (r > 1.6) return 0.0;",
+          "  float seed = hash3(vec3(floor(c * 0.05), 7.0));",
+          "  float a = -uTime * 0.42 + seed * 6.28;",
+          "  float ca = cos(a), sa = sin(a);",
+          "  vec2 rq = mat2(ca, -sa, sa, ca) * q;",
+          "  float ang = atan(rq.y, rq.x);",
+          "  float fn = fbm(vec3(cos(ang) * 2.2, sin(ang) * 2.2, r * 2.0 + seed * 5.0));",
+          "  float ringR = 0.78 + 0.22 * (fn - 0.5) * 2.0;",
+          "  float band = exp(-pow((r - ringR) / 0.44, 2.0));",
+          "  float wisp = mix(0.3, 1.0, fn);",
+          "  return band * wisp * exp(-age * 1.5);",
+          "}",
+          "void main() {",
+          "  vec2 frag = gl_FragCoord.xy;",
+          "  float v = 0.014 + hash3(vec3(floor(frag * 0.5), 1.0)) * 0.018;",
+          "  float acc = 0.0;",
+          "  for (int i = 0; i < N; i++) {",
+          "    if (i >= uCount) break;",
+          "    acc += shell(frag, vec2(uPoints[i * 3], uPoints[i * 3 + 1]), uPoints[i * 3 + 2]);",
+          "  }",
+          "  float grain = (hash3(vec3(floor(frag * 0.8), 3.0)) - 0.5) * 0.05;",
+          "  v += clamp(acc, 0.0, 2.0) * 0.1 + grain * clamp(acc, 0.0, 1.0);",
+          "  gl_FragColor = vec4(uBase + max(v, 0.0) * uTint, 1.0);",
+          "}",
+        ].join("\n");
+
+        var smokeEl = document.getElementById("smoke");
+        var gl = reduced
+          ? null
+          : smokeEl.getContext("webgl", {
+              alpha: false,
+              antialias: false,
+              premultipliedAlpha: false,
+            });
+        if (gl) startSmoke(gl);
+
+        function startSmoke(gl) {
+          function compile(type, src) {
+            var sh = gl.createShader(type);
+            gl.shaderSource(sh, src);
+            gl.compileShader(sh);
+            if (gl.getShaderParameter(sh, gl.COMPILE_STATUS)) return sh;
+            gl.deleteShader(sh);
+            return null;
+          }
+
+          var vs = compile(gl.VERTEX_SHADER, SMOKE_VERT);
+          var fs = compile(gl.FRAGMENT_SHADER, SMOKE_FRAG);
+          if (!vs || !fs) return;
+
+          var prog = gl.createProgram();
+          gl.attachShader(prog, vs);
+          gl.attachShader(prog, fs);
+          gl.linkProgram(prog);
+          if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+          gl.useProgram(prog);
+
+          var quad = gl.createBuffer();
+          gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+          gl.bufferData(
+            gl.ARRAY_BUFFER,
+            new Float32Array([-1, -1, 3, -1, -1, 3]),
+            gl.STATIC_DRAW,
+          );
+          var aPos = gl.getAttribLocation(prog, "aPos");
+          gl.enableVertexAttribArray(aPos);
+          gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+          var uTime = gl.getUniformLocation(prog, "uTime");
+          var uDpr = gl.getUniformLocation(prog, "uDpr");
+          var uPoints = gl.getUniformLocation(prog, "uPoints");
+          var uCount = gl.getUniformLocation(prog, "uCount");
+          var uBase = gl.getUniformLocation(prog, "uBase");
+          var uTint = gl.getUniformLocation(prog, "uTint");
+
+          var dpr = 1;
+          var puffs = [];
+          var slots = new Float32Array(SMOKE_MAX * 3);
+          var lastX = -1e9;
+          var lastY = -1e9;
+          var start = performance.now() / 1000;
+          var running = false;
+          var settled = false;
+          var raf = 0;
+
+          function clock() {
+            return performance.now() / 1000;
+          }
+
+          function sizeSmoke() {
+            dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+            smokeEl.width = Math.floor(window.innerWidth * dpr);
+            smokeEl.height = Math.floor(window.innerHeight * dpr);
+            smokeEl.style.width = window.innerWidth + "px";
+            smokeEl.style.height = window.innerHeight + "px";
+            gl.viewport(0, 0, smokeEl.width, smokeEl.height);
+            gl.uniform1f(uDpr, dpr);
+          }
+
+          function syncTheme() {
+            if (document.documentElement.dataset.theme === "dark") {
+              gl.uniform3f(uBase, 0, 0, 0);
+              gl.uniform3f(uTint, 0.78, 1, 0.9);
+            } else {
+              gl.uniform3f(uBase, 1, 1, 1);
+              gl.uniform3f(uTint, -1.3, -0.9, -1.15);
+            }
+          }
+
+          function draw() {
+            if (!running) return;
+            var t = clock();
+            for (var i = puffs.length - 1; i >= 0; i--) {
+              if (t - puffs[i].born > SMOKE_LIFE) puffs.splice(i, 1);
+            }
+            var n = Math.min(puffs.length, SMOKE_MAX);
+            if (n === 0 && settled) {
+              running = false;
+              return;
+            }
+            settled = n === 0;
+            for (var j = 0; j < n; j++) {
+              slots[j * 3] = puffs[j].x;
+              slots[j * 3 + 1] = puffs[j].y;
+              slots[j * 3 + 2] = t - puffs[j].born;
+            }
+            gl.clearColor(0, 0, 0, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.uniform1i(uCount, n);
+            gl.uniform1fv(uPoints, slots);
+            gl.uniform1f(uTime, t - start);
+            gl.drawArrays(gl.TRIANGLES, 0, 3);
+            raf = requestAnimationFrame(draw);
+          }
+
+          function kick() {
+            if (running || document.hidden) return;
+            running = true;
+            settled = false;
+            draw();
+          }
+
+          function onMove(e) {
+            var dx = e.clientX - lastX;
+            var dy = e.clientY - lastY;
+            if (dx * dx + dy * dy < SMOKE_GAP * SMOKE_GAP) return;
+            lastX = e.clientX;
+            lastY = e.clientY;
+            puffs.push({
+              x: e.clientX * dpr,
+              y: (window.innerHeight - e.clientY) * dpr,
+              born: clock(),
+            });
+            if (puffs.length > SMOKE_MAX) puffs.shift();
+            kick();
+          }
+
+          sizeSmoke();
+          syncTheme();
+          kick();
+
+          window.addEventListener("pointermove", onMove, { passive: true });
+          window.addEventListener("resize", function () {
+            sizeSmoke();
+            kick();
+          });
+          document.addEventListener("visibilitychange", function () {
+            if (document.hidden) {
+              running = false;
+              cancelAnimationFrame(raf);
+            } else {
+              kick();
+            }
+          });
+          new MutationObserver(function () {
+            syncTheme();
+            kick();
+          }).observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ["data-theme"],
+          });
         }
       })();
     </script>
