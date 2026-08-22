@@ -386,6 +386,17 @@
       .card[open] .marker {
         transform: rotate(90deg);
       }
+      /* the open-state summary padding has to unwind with the collapse; left
+         to [open] it snaps 2px -> 20px at the end and the card jumps back up */
+      .card.animating > summary {
+        transition: padding-bottom 380ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .card.shut > summary {
+        padding-bottom: 20px;
+      }
+      .card.shut .marker {
+        transform: none;
+      }
       @media (prefers-reduced-motion: reduce) {
         .card .marker {
           transition: none;
@@ -414,14 +425,13 @@
       .card-body {
         padding: 12px 24px 22px;
       }
-      /* padding animates alongside the height: a border-box cannot collapse
-         past its own padding, so max-height alone would leave a gap */
-      .card.animating > .card-body {
+      /* the body keeps its padding; this wrapper has none, so it can collapse
+         to a true zero that a padded border-box never could */
+      .card-clip {
         overflow: hidden;
-        transition:
-          max-height 380ms cubic-bezier(0.22, 1, 0.36, 1),
-          padding-top 380ms cubic-bezier(0.22, 1, 0.36, 1),
-          padding-bottom 380ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .card.animating > .card-clip {
+        transition: height 380ms cubic-bezier(0.22, 1, 0.36, 1);
       }
       .card p {
         font-size: 14px;
@@ -1330,47 +1340,38 @@
           .forEach(function (card) {
             var body = card.querySelector(".card-body");
             if (!body) return;
+            var clip = document.createElement("div");
+            clip.className = "card-clip";
+            card.insertBefore(clip, body);
+            clip.appendChild(body);
+
             card.querySelector("summary").addEventListener("click", function (e) {
               if (reduced) return;
               e.preventDefault();
               clearTimeout(cardTimers.get(card));
+              var closing = card.open;
+
+              // start state is set with transitions off, or it animates too.
+              // shut holds the closed summary look so [open] flipping cannot
+              // snap the padding out from under the height.
+              card.classList.remove("animating");
+              card.classList.toggle("shut", !closing);
+              if (!closing) card.open = true;
+              clip.style.height = (closing ? body.offsetHeight : 0) + "px";
+              void clip.offsetHeight;
+
               card.classList.add("animating");
-              var full;
-              if (card.open) {
-                full = body.scrollHeight;
-                body.style.maxHeight = full + "px";
-                void body.offsetHeight;
-                body.style.maxHeight = "0px";
-                body.style.paddingTop = "0px";
-                body.style.paddingBottom = "0px";
-                cardTimers.set(
-                  card,
-                  setTimeout(function () {
-                    card.open = false;
-                    card.classList.remove("animating");
-                    body.style.maxHeight = "";
-                    body.style.paddingTop = "";
-                    body.style.paddingBottom = "";
-                  }, CARD_MS),
-                );
-              } else {
-                card.open = true;
-                full = body.scrollHeight;
-                body.style.maxHeight = "0px";
-                body.style.paddingTop = "0px";
-                body.style.paddingBottom = "0px";
-                void body.offsetHeight;
-                body.style.maxHeight = full + "px";
-                body.style.paddingTop = "";
-                body.style.paddingBottom = "";
-                cardTimers.set(
-                  card,
-                  setTimeout(function () {
-                    card.classList.remove("animating");
-                    body.style.maxHeight = "";
-                  }, CARD_MS),
-                );
-              }
+              card.classList.toggle("shut", closing);
+              clip.style.height = (closing ? 0 : body.offsetHeight) + "px";
+
+              cardTimers.set(
+                card,
+                setTimeout(function () {
+                  if (closing) card.open = false;
+                  card.classList.remove("animating", "shut");
+                  clip.style.height = "";
+                }, CARD_MS),
+              );
             });
           });
 
