@@ -99,7 +99,7 @@
         --boot-term: 240ms;
         --boot-chrome: 820ms;
         --boot-rest: 980ms;
-        --boot-type: 1320ms;
+        --boot-type: 1620ms;
       }
       @keyframes boot-rise {
         from {
@@ -123,9 +123,38 @@
         animation: boot-rise 640ms cubic-bezier(0.22, 1, 0.36, 1)
           var(--boot-term) both;
       }
-      html.booting nav {
-        animation: boot-rise 520ms cubic-bezier(0.22, 1, 0.36, 1)
-          var(--boot-chrome) both;
+      @keyframes boot-pop {
+        from {
+          opacity: 0;
+          transform: translateY(6px) scale(0.96);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      html.booting nav .brand,
+      html.booting nav .right > a {
+        animation: boot-pop 240ms cubic-bezier(0.2, 0.9, 0.25, 1)
+          calc(var(--boot-chrome) + var(--i, 0) * 85ms) both;
+      }
+      html.booting nav .right > a:nth-child(1) {
+        --i: 1;
+      }
+      html.booting nav .right > a:nth-child(2) {
+        --i: 2;
+      }
+      html.booting nav .right > a:nth-child(3) {
+        --i: 3;
+      }
+      html.booting nav .right > a:nth-child(4) {
+        --i: 4;
+      }
+      html.booting nav .right > a:nth-child(5) {
+        --i: 5;
+      }
+      html.booting nav .right > a:nth-child(6) {
+        --i: 6;
       }
       html.booting #field {
         animation: boot-field 1200ms ease var(--boot-chrome) both;
@@ -1268,7 +1297,7 @@
                 "--boot-type",
               ),
             ) || 0;
-          setTimeout(nextStep, bootType + 120);
+          setTimeout(nextStep, bootType);
           setTimeout(function () {
             document.documentElement.classList.remove("booting");
           }, 2200);
