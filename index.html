@@ -10,7 +10,7 @@
     />
     <link
       rel="icon"
-      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect x=%2210%22 y=%2210%22 width=%2235%22 height=%2235%22 fill=%22%230f6b66%22/><rect x=%2255%22 y=%2210%22 width=%2235%22 height=%2235%22 fill=%22%234cc29a%22/><rect x=%2210%22 y=%2255%22 width=%2235%22 height=%2235%22 fill=%22%238fdcbd%22/><rect x=%2255%22 y=%2255%22 width=%2235%22 height=%2235%22 fill=%22%2312836f%22/></svg>"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect x=%2210%22 y=%2210%22 width=%2235%22 height=%2235%22 fill=%22%230f6b46%22/><rect x=%2255%22 y=%2210%22 width=%2235%22 height=%2235%22 fill=%22%234cc293%22/><rect x=%2210%22 y=%2255%22 width=%2235%22 height=%2235%22 fill=%22%238fdcbd%22/><rect x=%2255%22 y=%2255%22 width=%2235%22 height=%2235%22 fill=%22%23128356%22/></svg>"
     />
     <style>
       :root {
@@ -20,17 +20,17 @@
         --faint: #8a9a90;
         --line: #dde4e0;
         --card: #ffffff;
-        --t1: #0b4f46;
-        --t2: #0f6b66;
-        --t3: #12836f;
-        --t4: #23a07f;
-        --t5: #4cc29a;
+        --t1: #0b4f34;
+        --t2: #0f6b46;
+        --t3: #128356;
+        --t4: #23a06e;
+        --t5: #4cc293;
         --t6: #8fdcbd;
-        --rain-opacity: 0.1;
-        --term-shadow: 0 12px 40px rgba(15, 107, 102, 0.08);
-        --pop-shadow: 0 14px 34px rgba(15, 107, 102, 0.18);
-        --pulse-0: rgba(35, 160, 127, 0);
-        --pulse-1: rgba(35, 160, 127, 0.16);
+        --field-opacity: 0.62;
+        --term-shadow: 0 12px 40px rgba(15, 107, 70, 0.08);
+        --pop-shadow: 0 14px 34px rgba(15, 107, 70, 0.18);
+        --pulse-0: rgba(35, 160, 110, 0);
+        --pulse-1: rgba(35, 160, 110, 0.16);
         --glow: none;
       }
       html[data-theme="dark"] {
@@ -40,18 +40,18 @@
         --faint: #5e7268;
         --line: #22322b;
         --card: #101915;
-        --t1: #1a7a68;
-        --t2: #4cc29a;
-        --t3: #35b389;
-        --t4: #3fdc9c;
-        --t5: #6fe9b6;
-        --t6: #a5f4d1;
-        --rain-opacity: 0.16;
-        --term-shadow: 0 12px 48px rgba(63, 220, 156, 0.07);
+        --t1: #1a7a54;
+        --t2: #4cc293;
+        --t3: #35b381;
+        --t4: #3fdc9d;
+        --t5: #6fe9b8;
+        --t6: #a5f4d4;
+        --field-opacity: 0.8;
+        --term-shadow: 0 12px 48px rgba(63, 220, 157, 0.07);
         --pop-shadow: 0 14px 38px rgba(0, 0, 0, 0.55);
-        --pulse-0: rgba(63, 220, 156, 0);
-        --pulse-1: rgba(63, 220, 156, 0.2);
-        --glow: 0 0 8px rgba(63, 220, 156, 0.45);
+        --pulse-0: rgba(63, 220, 157, 0);
+        --pulse-1: rgba(63, 220, 157, 0.2);
+        --glow: 0 0 8px rgba(63, 220, 157, 0.45);
       }
       html[data-theme="dark"] body {
         color-scheme: dark;
@@ -93,11 +93,11 @@
         color: var(--t4);
         text-decoration: none;
       }
-      #rain {
+      #field {
         position: fixed;
         inset: 0;
         z-index: -1;
-        opacity: var(--rain-opacity);
+        opacity: var(--field-opacity);
       }
       #smoke {
         position: fixed;
@@ -572,7 +572,7 @@
     </script>
   </head>
   <body>
-    <canvas id="rain" aria-hidden="true"></canvas>
+    <canvas id="field" aria-hidden="true"></canvas>
     <canvas id="smoke" aria-hidden="true"></canvas>
 
     <nav>
@@ -1241,83 +1241,6 @@
           if (!e.target.closest(".proj")) closeNotes(null);
         });
 
-        /* ---- pixel rain ---- */
-        var canvas = document.getElementById("rain");
-        var ctx = canvas.getContext("2d");
-        var SHADES = [
-          "#0b4f46",
-          "#0f6b66",
-          "#12836f",
-          "#23a07f",
-          "#4cc29a",
-          "#8fdcbd",
-        ];
-        var CELL = 8,
-          GAP = 4,
-          STEP = CELL + GAP;
-        var drops = [];
-
-        function resize() {
-          canvas.width = window.innerWidth;
-          canvas.height = window.innerHeight;
-          var cols = Math.ceil(canvas.width / STEP);
-          drops = [];
-          for (var i = 0; i < cols; i++) {
-            if (Math.random() < 0.28) drops.push(newDrop(i, true));
-          }
-        }
-        function newDrop(col, anywhere) {
-          return {
-            col: col,
-            y: anywhere ? Math.random() * canvas.height : -Math.random() * 200,
-            speed: 0.25 + Math.random() * 0.6,
-            len: 3 + Math.floor(Math.random() * 5),
-            shade: SHADES[Math.floor(Math.random() * SHADES.length)],
-          };
-        }
-        function frame() {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          for (var i = 0; i < drops.length; i++) {
-            var d = drops[i];
-            for (var t = 0; t < d.len; t++) {
-              var cy = d.y - t * STEP;
-              if (cy < -CELL || cy > canvas.height) continue;
-              ctx.globalAlpha = 1 - t / d.len;
-              ctx.fillStyle = d.shade;
-              ctx.fillRect(
-                d.col * STEP,
-                Math.floor(cy / STEP) * STEP,
-                CELL,
-                CELL,
-              );
-            }
-            d.y += d.speed;
-            if (d.y - d.len * STEP > canvas.height)
-              drops[i] = newDrop(
-                Math.floor(Math.random() * (canvas.width / STEP)),
-                false,
-              );
-          }
-          ctx.globalAlpha = 1;
-          requestAnimationFrame(frame);
-        }
-        window.addEventListener("resize", resize);
-        resize();
-        if (reduced) {
-          for (var i = 0; i < drops.length; i++) {
-            var d = drops[i];
-            ctx.fillStyle = d.shade;
-            ctx.fillRect(
-              d.col * STEP,
-              Math.floor(d.y / STEP) * STEP,
-              CELL,
-              CELL,
-            );
-          }
-        } else {
-          requestAnimationFrame(frame);
-        }
-
         /* ---- cursor smoke ---- */
         var SMOKE_MAX = 12;
         var SMOKE_LIFE = 1.8;
@@ -1543,6 +1466,631 @@
             attributeFilter: ["data-theme"],
           });
         }
+      })();
+
+      /* ---- background field: an order/chaos wavefront over a particle lattice ---- */
+      (function () {
+        var canvas = document.getElementById("field");
+        if (!canvas) return;
+        var ctx = canvas.getContext("2d");
+        var reduced = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+
+        var WAVE_SPEED = 0.5;
+        var PARTICLE_DENSITY = 0.7;
+        var POINTER_EASE = 9;
+        var SWEEP_AXIS = "vertical";
+        // ambient background: 60fps is plenty, and high-refresh displays would
+        // otherwise pay double for motion nobody can see
+        var MIN_FRAME_MS = 1000 / 60;
+        var vertical = SWEEP_AXIS === "vertical";
+
+        var THEMES = {
+          dark: {
+            base: "12,18,16",
+            ord: [13, 138, 76],
+            ordHi: [77, 232, 155],
+            cha: [0, 255, 128],
+            chaHi: [214, 255, 235],
+            wave: [200, 255, 227],
+            peak: [226, 255, 241],
+            lattice: "42,150,96",
+            band: "190,255,225",
+            fade: 0.15,
+            patch: 0.45,
+            glowOrd: [42, 173, 108],
+            glowCha: [0, 255, 128],
+            glowWave: [216, 255, 236],
+          },
+          light: {
+            base: "244,246,245",
+            ord: [186, 208, 196],
+            ordHi: [53, 170, 122],
+            cha: [60, 163, 116],
+            chaHi: [26, 110, 76],
+            wave: [30, 98, 70],
+            peak: [18, 72, 51],
+            lattice: "120,175,148",
+            band: "40,110,80",
+            fade: 0.26,
+            patch: 0.3,
+            glowOrd: [140, 190, 170],
+            glowCha: [40, 150, 105],
+            glowWave: [10, 70, 48],
+          },
+        };
+        var P = THEMES.dark;
+        var glowOrdered, glowChaotic, glowWave;
+
+        var width, height, dpr, cx, cy;
+
+        function resize() {
+          dpr = Math.min(window.devicePixelRatio || 1, 2);
+          width = window.innerWidth;
+          height = window.innerHeight;
+          canvas.width = Math.round(width * dpr);
+          canvas.height = Math.round(height * dpr);
+          canvas.style.width = width + "px";
+          canvas.style.height = height + "px";
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          cx = width / 2;
+          cy = height / 2;
+        }
+
+        var perm = new Uint8Array(512);
+        var grad2 = [
+          [1, 0], [-1, 0], [0, 1], [0, -1],
+          [1, 1], [-1, 1], [1, -1], [-1, -1],
+        ];
+        (function initNoise() {
+          var q = new Uint8Array(256);
+          for (var i = 0; i < 256; i++) q[i] = i;
+          for (var j = 255; j > 0; j--) {
+            var k = (Math.random() * (j + 1)) | 0;
+            var t = q[j];
+            q[j] = q[k];
+            q[k] = t;
+          }
+          for (var m = 0; m < 512; m++) perm[m] = q[m & 255];
+        })();
+
+        function noise2d(x, y) {
+          var ix = Math.floor(x) & 255;
+          var iy = Math.floor(y) & 255;
+          var fx = x - Math.floor(x);
+          var fy = y - Math.floor(y);
+          var ux = fx * fx * (3 - 2 * fx);
+          var uy = fy * fy * (3 - 2 * fy);
+          var g00 = grad2[perm[ix + perm[iy]] & 7];
+          var g10 = grad2[perm[ix + 1 + perm[iy]] & 7];
+          var g01 = grad2[perm[ix + perm[iy + 1]] & 7];
+          var g11 = grad2[perm[ix + 1 + perm[iy + 1]] & 7];
+          var d00 = g00[0] * fx + g00[1] * fy;
+          var d10 = g10[0] * (fx - 1) + g10[1] * fy;
+          var d01 = g01[0] * fx + g01[1] * (fy - 1);
+          var d11 = g11[0] * (fx - 1) + g11[1] * (fy - 1);
+          var nx0 = d00 + ux * (d10 - d00);
+          var nx1 = d01 + ux * (d11 - d01);
+          return nx0 + uy * (nx1 - nx0);
+        }
+
+        function fbm(x, y, octaves) {
+          var val = 0, amp = 0.5, freq = 1;
+          for (var i = 0; i < octaves; i++) {
+            val += amp * noise2d(x * freq, y * freq);
+            amp *= 0.5;
+            freq *= 2;
+          }
+          return val;
+        }
+
+        function smoothstep(edge0, edge1, x) {
+          var t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+          return t * t * (3 - 2 * t);
+        }
+
+        var COUNT = 0;
+        var posX, posY, velX, velY, homeX, homeY;
+        var latticeCol, latticeRow;
+        var cols, rows, spacingX, spacingY;
+
+        function initParticles() {
+          var base = 2500 * PARTICLE_DENSITY;
+          COUNT = Math.round(base * Math.sqrt((width * height) / (1920 * 1080)));
+          COUNT = Math.max(400, Math.min(COUNT, 5000));
+          var aspect = width / height;
+          rows = Math.round(Math.sqrt(COUNT / aspect));
+          cols = Math.round(rows * aspect);
+          COUNT = rows * cols;
+          spacingX = width / (cols + 1);
+          spacingY = height / (rows + 1);
+
+          posX = new Float32Array(COUNT);
+          posY = new Float32Array(COUNT);
+          velX = new Float32Array(COUNT);
+          velY = new Float32Array(COUNT);
+          homeX = new Float32Array(COUNT);
+          homeY = new Float32Array(COUNT);
+          latticeCol = new Int32Array(COUNT);
+          latticeRow = new Int32Array(COUNT);
+
+          var idx = 0;
+          for (var r = 0; r < rows; r++) {
+            for (var c = 0; c < cols; c++) {
+              var hx = (c + 1) * spacingX;
+              var hy = (r + 1) * spacingY;
+              homeX[idx] = hx;
+              homeY[idx] = hy;
+              posX[idx] = hx + (Math.random() - 0.5) * spacingX * 0.3;
+              posY[idx] = hy + (Math.random() - 0.5) * spacingY * 0.3;
+              latticeCol[idx] = c;
+              latticeRow[idx] = r;
+              idx++;
+            }
+          }
+        }
+
+        var wavePos = 0;
+        var waveDir = 1;
+        var wavePhase = 0;
+        var waveCycleTime = 0;
+
+        function sweepSpan() {
+          return vertical ? height : width;
+        }
+        function sweepCoord(x, y) {
+          return vertical ? y : x;
+        }
+        function distToWaveAt(x, y, waveAt) {
+          return (sweepCoord(x, y) - waveAt) * waveDir;
+        }
+        function phaseFromDist(d, transWidth) {
+          return wavePhase === 0
+            ? 1 - smoothstep(-transWidth, transWidth, d)
+            : smoothstep(-transWidth, transWidth, d);
+        }
+
+        // Resume the free-running cycle at the position the pointer released,
+        // not wherever the clock drifted to. Inverts the smoothstep easing.
+        function reseedCycle(pos, cycleDuration) {
+          var k = Math.floor(waveCycleTime / cycleDuration);
+          var eased = k % 2 === 0 ? pos : 1 - pos;
+          eased = Math.max(0, Math.min(1, eased));
+          var within = 0.5 - Math.sin(Math.asin(1 - 2 * eased) / 3);
+          within = Math.max(0, Math.min(within, 0.999999));
+          waveCycleTime = (k + within) * cycleDuration;
+        }
+
+        var trailCanvas = document.createElement("canvas");
+        var trailCtx = trailCanvas.getContext("2d");
+
+        function resizeTrail() {
+          trailCanvas.width = canvas.width;
+          trailCanvas.height = canvas.height;
+          trailCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          trailCtx.fillStyle = "rgb(" + P.base + ")";
+          trailCtx.fillRect(0, 0, width, height);
+        }
+
+        var GLOW_RES = 64;
+        function makeGlowSprite(rgb) {
+          var c = document.createElement("canvas");
+          c.width = GLOW_RES * 2;
+          c.height = GLOW_RES * 2;
+          var gc = c.getContext("2d");
+          var head = "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ",";
+          var g = gc.createRadialGradient(
+            GLOW_RES, GLOW_RES, 0, GLOW_RES, GLOW_RES, GLOW_RES,
+          );
+          g.addColorStop(0, head + "0.6)");
+          g.addColorStop(0.3, head + "0.2)");
+          g.addColorStop(0.7, head + "0.04)");
+          g.addColorStop(1, head + "0)");
+          gc.fillStyle = g;
+          gc.beginPath();
+          gc.arc(GLOW_RES, GLOW_RES, GLOW_RES, 0, Math.PI * 2);
+          gc.fill();
+          return c;
+        }
+
+        function syncTheme() {
+          P =
+            document.documentElement.dataset.theme === "light"
+              ? THEMES.light
+              : THEMES.dark;
+          glowOrdered = makeGlowSprite(P.glowOrd);
+          glowChaotic = makeGlowSprite(P.glowCha);
+          glowWave = makeGlowSprite(P.glowWave);
+          trailCtx.fillStyle = "rgb(" + P.base + ")";
+          trailCtx.fillRect(0, 0, width, height);
+        }
+
+        var SPRING_K = 4.0;
+        var DAMPING = 3.5;
+        var TURBULENCE_SCALE = 0.003;
+        var TURBULENCE_STRENGTH = 120;
+
+        var paused = false;
+        var lastTime = 0;
+        var needsResize = false;
+        var mouseActive = false;
+        var mouseWavePos = 0.5;
+        var resumeFromPointer = false;
+
+        function update(dt, time) {
+          var span = sweepSpan();
+          var cycleDuration = (span * 1.4) / (WAVE_SPEED * 180);
+          if (resumeFromPointer) {
+            resumeFromPointer = false;
+            reseedCycle(wavePos, cycleDuration);
+          }
+          waveCycleTime += dt;
+
+          var rawProgress = waveCycleTime / cycleDuration;
+          var cycleIndex = Math.floor(rawProgress);
+          var withinCycle = rawProgress - cycleIndex;
+          var eased = withinCycle * withinCycle * (3 - 2 * withinCycle);
+
+          var autoPos;
+          if (cycleIndex % 2 === 0) {
+            autoPos = eased;
+            waveDir = 1;
+          } else {
+            autoPos = 1 - eased;
+            waveDir = -1;
+          }
+          wavePhase = cycleIndex % 4 < 2 ? 0 : 1;
+
+          // Pointer steers the boundary, but the front trails it instead of
+          // snapping. Exponential so the lag is the same at any frame rate.
+          if (mouseActive) {
+            wavePos +=
+              (mouseWavePos - wavePos) * (1 - Math.exp(-POINTER_EASE * dt));
+          } else {
+            wavePos = autoPos;
+          }
+
+          var waveAt = wavePos * span;
+          var transWidth = span * 0.12;
+          var noiseT = time * 0.4;
+
+          for (var i = 0; i < COUNT; i++) {
+            var px = posX[i];
+            var py = posY[i];
+            var distToWave = distToWaveAt(px, py, waveAt);
+            var phase = phaseFromDist(distToWave, transWidth);
+
+            var transEnergy = 1 - Math.abs(distToWave) / transWidth;
+            transEnergy = Math.max(0, transEnergy);
+            transEnergy = transEnergy * transEnergy;
+
+            var orderedFx = (homeX[i] - px) * SPRING_K - velX[i] * DAMPING;
+            var orderedFy = (homeY[i] - py) * SPRING_K - velY[i] * DAMPING;
+
+            var nx = px * TURBULENCE_SCALE;
+            var ny = py * TURBULENCE_SCALE;
+            var angle = fbm(nx + noiseT, ny + noiseT * 0.7, 3) * Math.PI * 4;
+            var turbFx = Math.cos(angle) * TURBULENCE_STRENGTH;
+            var turbFy = Math.sin(angle) * TURBULENCE_STRENGTH;
+            var swirlAngle = Math.atan2(py - cy, px - cx);
+            var swirlDist = Math.sqrt(
+              (px - cx) * (px - cx) + (py - cy) * (py - cy),
+            );
+            var swirl = 30 * Math.min(1, swirlDist / (width * 0.3));
+            turbFx += Math.cos(swirlAngle + Math.PI * 0.5) * swirl;
+            turbFy += Math.sin(swirlAngle + Math.PI * 0.5) * swirl;
+            var chaoticFx = turbFx - velX[i] * 1.2;
+            var chaoticFy = turbFy - velY[i] * 1.2;
+
+            var kickFx = 0, kickFy = 0;
+            if (transEnergy > 0.01) {
+              var kickAngle =
+                fbm(nx * 2 + noiseT * 1.5, ny * 2 + 100, 2) * Math.PI * 2;
+              kickFx = Math.cos(kickAngle) * transEnergy * 200;
+              kickFy = Math.sin(kickAngle) * transEnergy * 200;
+            }
+
+            velX[i] +=
+              (orderedFx * (1 - phase) + chaoticFx * phase + kickFx) * dt;
+            velY[i] +=
+              (orderedFy * (1 - phase) + chaoticFy * phase + kickFy) * dt;
+
+            var speed = Math.sqrt(velX[i] * velX[i] + velY[i] * velY[i]);
+            if (speed > 300) {
+              velX[i] = (velX[i] / speed) * 300;
+              velY[i] = (velY[i] / speed) * 300;
+            }
+
+            posX[i] += velX[i] * dt;
+            posY[i] += velY[i] * dt;
+
+            var margin = 20;
+            if (posX[i] < -margin) {
+              posX[i] = -margin;
+              velX[i] = Math.abs(velX[i]) * 0.5;
+            }
+            if (posX[i] > width + margin) {
+              posX[i] = width + margin;
+              velX[i] = -Math.abs(velX[i]) * 0.5;
+            }
+            if (posY[i] < -margin) {
+              posY[i] = -margin;
+              velY[i] = Math.abs(velY[i]) * 0.5;
+            }
+            if (posY[i] > height + margin) {
+              posY[i] = height + margin;
+              velY[i] = -Math.abs(velY[i]) * 0.5;
+            }
+          }
+        }
+
+        function render(timestamp) {
+          requestAnimationFrame(render);
+          if (paused) return;
+          if (needsResize) {
+            needsResize = false;
+            resize();
+            initParticles();
+            resizeTrail();
+          }
+          if (!lastTime) lastTime = timestamp;
+          var elapsed = timestamp - lastTime;
+          if (elapsed < MIN_FRAME_MS) return;
+          lastTime = timestamp;
+          var dt = Math.min(elapsed / 1000, 0.033);
+          if (reduced) dt *= 0.15;
+          var time = timestamp / 1000;
+
+          update(dt, time);
+
+          trailCtx.fillStyle = "rgba(" + P.base + "," + P.fade + ")";
+          trailCtx.fillRect(0, 0, width, height);
+
+          var span = sweepSpan();
+          var waveAt = wavePos * span;
+          var transWidth = span * 0.12;
+          var noiseT = time * 0.4;
+          var i, j, dx, dy, dist, alpha, phase;
+
+          if (!reduced) {
+            var step = 40;
+            for (var bx = 0; bx < width; bx += step) {
+              for (var by = 0; by < height; by += step) {
+                var bgPhase = phaseFromDist(
+                  distToWaveAt(bx, by, waveAt),
+                  transWidth,
+                );
+                var nVal = fbm(
+                  bx * 0.005 + noiseT * 0.3,
+                  by * 0.005 + noiseT * 0.2,
+                  2,
+                );
+                var bgAlpha =
+                  (0.01 + Math.abs(nVal) * 0.04) * bgPhase * P.patch;
+                if (bgAlpha < 0.003) continue;
+                trailCtx.fillStyle =
+                  "rgba(" + P.cha[0] + "," + P.cha[1] + "," + P.cha[2] + "," +
+                  bgAlpha.toFixed(3) + ")";
+                trailCtx.fillRect(bx, by, step, step);
+              }
+            }
+          }
+
+          trailCtx.lineWidth = 0.5;
+          for (i = 0; i < COUNT; i++) {
+            phase = phaseFromDist(
+              distToWaveAt(posX[i], posY[i], waveAt),
+              transWidth,
+            );
+            if (phase > 0.5) continue;
+            var lineAlpha = (1 - phase * 2) * 0.08;
+            if (lineAlpha < 0.005) continue;
+
+            if (latticeCol[i] < cols - 1) {
+              j = i + 1;
+              dx = posX[j] - posX[i];
+              dy = posY[j] - posY[i];
+              dist = Math.sqrt(dx * dx + dy * dy);
+              if (dist < spacingX * 2) {
+                alpha = lineAlpha * (1 - dist / (spacingX * 2));
+                trailCtx.strokeStyle =
+                  "rgba(" + P.lattice + "," + alpha.toFixed(3) + ")";
+                trailCtx.beginPath();
+                trailCtx.moveTo(posX[i], posY[i]);
+                trailCtx.lineTo(posX[j], posY[j]);
+                trailCtx.stroke();
+              }
+            }
+            if (latticeRow[i] < rows - 1) {
+              j = i + cols;
+              dx = posX[j] - posX[i];
+              dy = posY[j] - posY[i];
+              dist = Math.sqrt(dx * dx + dy * dy);
+              if (dist < spacingY * 2) {
+                alpha = lineAlpha * (1 - dist / (spacingY * 2));
+                trailCtx.strokeStyle =
+                  "rgba(" + P.lattice + "," + alpha.toFixed(3) + ")";
+                trailCtx.beginPath();
+                trailCtx.moveTo(posX[i], posY[i]);
+                trailCtx.lineTo(posX[j], posY[j]);
+                trailCtx.stroke();
+              }
+            }
+          }
+
+          if (!reduced) {
+            var glow = transWidth * 2.5;
+            var g = vertical
+              ? trailCtx.createLinearGradient(0, waveAt - glow, 0, waveAt + glow)
+              : trailCtx.createLinearGradient(waveAt - glow, 0, waveAt + glow, 0);
+            g.addColorStop(0, "rgba(" + P.band + ",0)");
+            g.addColorStop(0.3, "rgba(" + P.band + ",0.02)");
+            g.addColorStop(0.5, "rgba(" + P.band + ",0.07)");
+            g.addColorStop(0.7, "rgba(" + P.band + ",0.02)");
+            g.addColorStop(1, "rgba(" + P.band + ",0)");
+            trailCtx.fillStyle = g;
+            if (vertical) {
+              trailCtx.fillRect(0, waveAt - glow, width, glow * 2);
+            } else {
+              trailCtx.fillRect(waveAt - glow, 0, glow * 2, height);
+            }
+
+            trailCtx.strokeStyle = "rgba(" + P.band + ",0.14)";
+            trailCtx.lineWidth = 2;
+            trailCtx.beginPath();
+            if (vertical) {
+              for (var x = 0; x < width; x += 8) {
+                var wv = fbm(x * 0.01 + time * 0.5, time * 0.3, 2) * 15;
+                if (x === 0) trailCtx.moveTo(x, waveAt + wv);
+                else trailCtx.lineTo(x, waveAt + wv);
+              }
+            } else {
+              for (var y = 0; y < height; y += 8) {
+                var wh = fbm(y * 0.01 + time * 0.5, time * 0.3, 2) * 15;
+                if (y === 0) trailCtx.moveTo(waveAt + wh, y);
+                else trailCtx.lineTo(waveAt + wh, y);
+              }
+            }
+            trailCtx.stroke();
+          }
+
+          for (i = 0; i < COUNT; i++) {
+            phase = phaseFromDist(
+              distToWaveAt(posX[i], posY[i], waveAt),
+              transWidth,
+            );
+            if (phase > 0.3) {
+              var sp = Math.sqrt(velX[i] * velX[i] + velY[i] * velY[i]);
+              var tAlpha = phase * Math.min(1, sp / 100) * 0.15;
+              if (tAlpha > 0.005) {
+                trailCtx.fillStyle =
+                  "rgba(" +
+                  Math.round(P.ord[0] + (P.cha[0] - P.ord[0]) * phase) + "," +
+                  Math.round(P.ord[1] + (P.cha[1] - P.ord[1]) * phase) + "," +
+                  Math.round(P.ord[2] + (P.cha[2] - P.ord[2]) * phase) + "," +
+                  tAlpha.toFixed(3) + ")";
+                trailCtx.beginPath();
+                trailCtx.arc(posX[i], posY[i], 1.5, 0, Math.PI * 2);
+                trailCtx.fill();
+              }
+            }
+          }
+
+          ctx.drawImage(
+            trailCanvas, 0, 0, trailCanvas.width, trailCanvas.height,
+            0, 0, width, height,
+          );
+
+          for (i = 0; i < COUNT; i++) {
+            var cpx = posX[i];
+            var cpy = posY[i];
+            var d = distToWaveAt(cpx, cpy, waveAt);
+            phase = phaseFromDist(d, transWidth);
+            var energy = Math.max(0, 1 - Math.abs(d) / transWidth);
+            energy = energy * energy;
+
+            var size = 1.2 + phase * 0.8 + energy * 2.5;
+            var speed2 = Math.sqrt(velX[i] * velX[i] + velY[i] * velY[i]);
+            var bright = Math.min(1, speed2 / 150);
+
+            var r, gg, b;
+            if (energy > 0.1) {
+              r = P.wave[0] + (P.peak[0] - P.wave[0]) * energy * 0.5;
+              gg = P.wave[1] + (P.peak[1] - P.wave[1]) * energy * 0.5;
+              b = P.wave[2] + (P.peak[2] - P.wave[2]) * energy * 0.3;
+            } else if (phase < 0.5) {
+              var hdx = cpx - homeX[i];
+              var hdy = cpy - homeY[i];
+              var settled =
+                1 - Math.min(1, Math.sqrt(hdx * hdx + hdy * hdy) / spacingX);
+              r = P.ord[0] + (P.ordHi[0] - P.ord[0]) * settled;
+              gg = P.ord[1] + (P.ordHi[1] - P.ord[1]) * settled;
+              b = P.ord[2] + (P.ordHi[2] - P.ord[2]) * settled;
+            } else {
+              r = P.cha[0] + (P.chaHi[0] - P.cha[0]) * bright;
+              gg = P.cha[1] + (P.chaHi[1] - P.cha[1]) * bright;
+              b = P.cha[2] + (P.chaHi[2] - P.cha[2]) * bright;
+            }
+
+            var a = Math.min(1, 0.6 + energy * 0.4 + bright * 0.15);
+
+            if (energy > 0.05 || (phase > 0.5 && speed2 > 50)) {
+              var gs = size * 3;
+              var ga = (energy * 0.3 + bright * 0.08) * a;
+              if (ga > 0.005) {
+                ctx.globalAlpha = Math.min(ga, 0.8);
+                ctx.drawImage(
+                  energy > 0.1
+                    ? glowWave
+                    : phase < 0.5
+                      ? glowOrdered
+                      : glowChaotic,
+                  cpx - gs, cpy - gs, gs * 2, gs * 2,
+                );
+                ctx.globalAlpha = 1;
+              }
+            }
+
+            ctx.fillStyle =
+              "rgba(" + Math.round(r) + "," + Math.round(gg) + "," +
+              Math.round(b) + "," + a.toFixed(3) + ")";
+            ctx.beginPath();
+            ctx.arc(cpx, cpy, size, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (energy > 0.3) {
+              ctx.fillStyle =
+                "rgba(" + P.peak[0] + "," + P.peak[1] + "," + P.peak[2] + "," +
+                (energy * 0.5).toFixed(3) + ")";
+              ctx.beginPath();
+              ctx.arc(cpx, cpy, size * 0.4, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+
+          var maxDim = Math.max(width, height);
+          var vg = ctx.createRadialGradient(
+            cx, cy, maxDim * 0.3, cx, cy, maxDim * 0.85,
+          );
+          vg.addColorStop(0, "rgba(" + P.base + ",0)");
+          vg.addColorStop(1, "rgba(" + P.base + ",0.45)");
+          ctx.fillStyle = vg;
+          ctx.fillRect(0, 0, width, height);
+        }
+
+        resize();
+        initParticles();
+        resizeTrail();
+        syncTheme();
+
+        window.addEventListener("resize", function () {
+          needsResize = true;
+        });
+        window.addEventListener(
+          "mousemove",
+          function (e) {
+            mouseActive = true;
+            mouseWavePos = vertical
+              ? e.clientY / height
+              : e.clientX / width;
+          },
+          { passive: true },
+        );
+        document.addEventListener("mouseleave", function () {
+          if (mouseActive) resumeFromPointer = true;
+          mouseActive = false;
+        });
+        document.addEventListener("visibilitychange", function () {
+          paused = document.hidden;
+          if (!paused) lastTime = 0;
+        });
+        new MutationObserver(syncTheme).observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ["data-theme"],
+        });
+
+        requestAnimationFrame(render);
       })();
     </script>
   </body>
