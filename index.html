@@ -1352,29 +1352,43 @@
             card.insertBefore(clip, body);
             clip.appendChild(body);
 
+            var expanded = card.open;
             card.querySelector("summary").addEventListener("click", function (e) {
+              // the project title is a link inside the summary; preventing the
+              // default here would swallow the navigation
+              if (e.target.closest("a")) {
+                var wasOpen = card.open;
+                setTimeout(function () {
+                  card.open = wasOpen;
+                }, 0);
+                return;
+              }
               if (reduced) return;
               e.preventDefault();
+
+              var startH = clip.offsetHeight;
+              expanded = !expanded;
+              if (expanded) card.open = true;
+
+              if (card.classList.contains("animating")) {
+                // mid-flight: retarget and let it interpolate from where it is,
+                // rather than resetting the start and jiggling
+                card.classList.toggle("shut", !expanded);
+                clip.style.height = (expanded ? body.offsetHeight : 0) + "px";
+              } else {
+                card.classList.toggle("shut", expanded);
+                clip.style.height = startH + "px";
+                void clip.offsetHeight;
+                card.classList.add("animating");
+                card.classList.toggle("shut", !expanded);
+                clip.style.height = (expanded ? body.offsetHeight : 0) + "px";
+              }
+
               clearTimeout(cardTimers.get(card));
-              var closing = card.open;
-
-              // start state is set with transitions off, or it animates too.
-              // shut holds the closed summary look so [open] flipping cannot
-              // snap the padding out from under the height.
-              card.classList.remove("animating");
-              card.classList.toggle("shut", !closing);
-              if (!closing) card.open = true;
-              clip.style.height = (closing ? body.offsetHeight : 0) + "px";
-              void clip.offsetHeight;
-
-              card.classList.add("animating");
-              card.classList.toggle("shut", closing);
-              clip.style.height = (closing ? 0 : body.offsetHeight) + "px";
-
               cardTimers.set(
                 card,
                 setTimeout(function () {
-                  if (closing) card.open = false;
+                  if (!expanded) card.open = false;
                   card.classList.remove("animating", "shut");
                   clip.style.height = "";
                 }, CARD_MS),
