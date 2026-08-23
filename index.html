@@ -647,12 +647,19 @@
     </style>
     <script>
       (function () {
+        // a deep link (#projects, #work, ...) lands mid-page, where the intro
+        // would only show blank ground until it finishes: skip the boot there
+        var deep = location.hash.length > 1;
         // the intro starts at the top; a restored scroll lands mid-page
-        if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+        if ("scrollRestoration" in history && !deep)
+          history.scrollRestoration = "manual";
         var saved = localStorage.getItem("theme");
         document.documentElement.dataset.theme =
           saved === "light" ? "light" : "dark";
-        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        if (
+          !deep &&
+          !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ) {
           document.documentElement.classList.add("booting");
         }
       })();
@@ -1298,8 +1305,10 @@
             }
             if (si >= SESSION.length) {
               endLine(live).appendChild(cursor);
-              // the field is the payoff: it blooms once the session is done
+              // the field is the payoff: it blooms once the session is done.
+              // a deep link never booted, so the rest is already on screen
               var root = document.documentElement;
+              if (!root.classList.contains("booting")) return;
               root.classList.add("field-in");
               setTimeout(function () {
                 root.classList.add("rest-in");
