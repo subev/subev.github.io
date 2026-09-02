@@ -924,23 +924,24 @@
             <span class="marker" aria-hidden="true">❯</span>
             <h3>
               <a
-                href="https://github.com/subev/pdf2audio"
+                href="https://github.com/subev/libratory"
                 class="ext"
                 target="_blank"
                 rel="noopener"
-                >pdf2audio</a
+                >Libratory</a
               >
             </h3>
             <span class="meta"
-              >side project · open source · demo videos in the README</span
+              >open source · web, desktop and iOS · released most days · demo
+              videos in the README</span
             >
           </summary>
           <div class="card-body">
             <p>
               A <b>personal audiobook library you live in</b>, running fully
-              offline on Apple Silicon. PDFs in → chapter-marked M4B audiobooks
-              out, via local TTS (Kokoro and friends) with AI chapter detection
-              and OCR cleanup. Then the fun part:
+              offline on your own machine. PDFs in → chapter-marked M4B
+              audiobooks out, via local TTS (Kokoro and friends) with AI chapter
+              detection and OCR cleanup. Then the fun part:
               <b>chat with your whole library</b> — an agentic assistant over
               hybrid full-text + semantic search (local embeddings, ask in
               English, find the Bulgarian passage) that streams answers with
@@ -950,9 +951,21 @@
               and synced EPUBs give you
               <b>read-along with sentence-level highlighting</b> on your phone.
             </p>
+            <p>
+              About 39,000 lines of TypeScript, 538 tests, released most days:
+              a web app, an Electron desktop build, a Docker image for a
+              headless box, and a separate iOS read-along app. Every AI feature
+              in it is built on the assumption
+              <b>the model is wrong</b> — translations never overwrite the
+              original, every chat answer carries a citation you can click back
+              to its page, and a job that fails stays failed instead of quietly
+              retrying, because a retry you didn't ask for is a decision taken
+              away from you.
+            </p>
             <div class="stack">
-              <span>typescript</span><span>local llms</span><span>rag</span
-              ><span>pgvector</span><span>kokoro tts</span
+              <span>typescript</span><span>react 19</span><span>fastify</span
+              ><span>local llms</span><span>rag</span><span>drizzle</span
+              ><span>electron</span><span>kokoro tts</span
               ><span>epub media overlays</span>
             </div>
           </div>
@@ -961,11 +974,11 @@
           type="button"
           class="why"
           aria-expanded="false"
-          aria-controls="why-pdf2audio"
+          aria-controls="why-libratory"
         >
           why?
         </button>
-        <div class="pop" id="why-pdf2audio" role="note">
+        <div class="pop" id="why-libratory" role="note">
           <div class="pop-in">
             <button type="button" class="pop-close" aria-label="Close">
               ✕
@@ -986,6 +999,13 @@
               out the door.
             </p>
             <div class="links">
+              <a
+                href="https://libratory.dev"
+                class="ext"
+                target="_blank"
+                rel="noopener"
+                >libratory.dev</a
+              >
               <a
                 href="https://youtu.be/fmIiWdthnfg"
                 class="ext"
